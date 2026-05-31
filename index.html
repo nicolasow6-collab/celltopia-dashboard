@@ -842,9 +842,13 @@
     }
 
     function checkInventoryAlerts(previous, current) {
+      const banner = document.getElementById('alertBanner');
+      const alertList = document.getElementById('alertList');
+      
+      if (!banner || !alertList) return;
+      
       const alerts = [];
       
-      // Check for new stock (products in current but not in previous)
       const currentIds = new Set(current.map(p => p.id));
       const previousIds = new Set(previous.map(p => p.id));
       
@@ -857,10 +861,6 @@
         });
       }
 
-      // Show alerts
-      const banner = document.getElementById('alertBanner');
-      const alertList = document.getElementById('alertList');
-      
       if (alerts.length > 0) {
         let html = '';
         alerts.forEach(alert => {
@@ -896,28 +896,49 @@
     }
 
     function updateTokenUsage() {
-      document.getElementById('tokenScraping').textContent = apiCalls.toLocaleString();
-      document.getElementById('tokenLLM').textContent = llmTokens.toLocaleString();
-      document.getElementById('tokenContent').textContent = totalProductsFetched.toLocaleString();
-      document.getElementById('tokenPosting').textContent = postsCreated.toLocaleString();
+      const scrapingEl = document.getElementById('tokenScraping');
+      const llmEl = document.getElementById('tokenLLM');
+      const contentEl = document.getElementById('tokenContent');
+      const postingEl = document.getElementById('tokenPosting');
+      const sessionEl = document.getElementById('tokenSession');
+      const dailyEl = document.getElementById('tokenDaily');
+      const progressEl = document.getElementById('tokenProgress');
+      const percentageEl = document.getElementById('tokenPercentage');
+      
+      if (!scrapingEl || !llmEl || !contentEl || !postingEl || !sessionEl || !dailyEl || !progressEl || !percentageEl) return;
+      
+      scrapingEl.textContent = apiCalls.toLocaleString();
+      llmEl.textContent = llmTokens.toLocaleString();
+      contentEl.textContent = totalProductsFetched.toLocaleString();
+      postingEl.textContent = postsCreated.toLocaleString();
       
       const totalTokens = apiCalls + llmTokens;
-      document.getElementById('tokenSession').textContent = totalTokens.toLocaleString();
-      document.getElementById('tokenDaily').textContent = totalTokens.toLocaleString();
+      sessionEl.textContent = totalTokens.toLocaleString();
+      dailyEl.textContent = totalTokens.toLocaleString();
 
       const percentage = (apiCalls / 1000) * 100;
-      document.getElementById('tokenProgress').style.width = `${Math.min(percentage, 100)}%`;
-      document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
+      progressEl.style.width = `${Math.min(percentage, 100)}%`;
+      percentageEl.textContent = `${percentage.toFixed(2)}% used`;
     }
 
     function updateDashboard(posts, inventory = []) {
+      const inventoryCountEl = document.getElementById('inventoryCount');
+      const inStockEl = document.getElementById('inStockCount');
+      const soldEl = document.getElementById('soldCount');
+      const postsTodayEl = document.getElementById('postsToday');
+      const postsBreakdownEl = document.getElementById('postsBreakdown');
+      const engagementEl = document.getElementById('totalEngagement');
+      const engagementBreakdownEl = document.getElementById('engagementBreakdown');
+      
+      if (!inventoryCountEl || !inStockEl || !soldEl) return;
+      
       const totalInventory = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
       const sold = inventory.filter(p => p.stock <= 0).length;
 
       animateValue('inventoryCount', totalInventory);
-      document.getElementById('inStockCount').textContent = inStock;
-      document.getElementById('soldCount').textContent = sold;
+      inStockEl.textContent = inStock;
+      soldEl.textContent = sold;
 
       const today = new Date().toDateString();
       const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
@@ -925,15 +946,15 @@
       const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
       const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      animateValue('postsToday', todayPosts.length);
-      document.getElementById('postsBreakdown').innerHTML = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
+      if (postsTodayEl) animateValue('postsToday', todayPosts.length);
+      if (postsBreakdownEl) postsBreakdownEl.innerHTML = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
 
       const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
       const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
       const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
 
-      animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
-      document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
+      if (engagementEl) animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
+      if (engagementBreakdownEl) engagementBreakdownEl.textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
 
       updateInventoryTable(filteredInventory);
       updateTaskBoard();
@@ -1034,6 +1055,8 @@
 
     function updateActivityFeed(inventory, syncTime, success, errorMsg = '') {
       const feed = document.getElementById('activityFeed');
+      if (!feed) return;
+      
       if (success && inventory.length > 0) {
         feed.innerHTML = `
           <div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition">
