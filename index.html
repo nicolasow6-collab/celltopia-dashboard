@@ -99,132 +99,16 @@
       66% { transform: translate(-1%, 1%) scale(0.98); }
     }
     
-    /* Main content above background */
-    #main-content {
-      position: relative;
-      z-index: 1;
-    }
-    
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-    
-    /* Glassmorphism cards */
+    /* Glass cards */
     .glass {
       background: var(--bg-card);
       backdrop-filter: blur(24px);
       border: 1px solid var(--border);
       border-radius: 16px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .glass:hover {
-      background: var(--bg-card-hover);
       border-color: var(--border-hover);
-    }
-    
-    /* Status indicator with glow */
-    .status-dot {
-      position: relative;
-      width: 8px;
-      height: 8px;
-      background: var(--emerald-accent);
-      border-radius: 50%;
-      box-shadow: 0 0 20px var(--purple-glow);
-    }
-    
-    .status-dot::before {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      background: var(--emerald-accent);
-      border-radius: 50%;
-      opacity: 0.4;
-      filter: blur(8px);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.2); }
-    }
-    
-    /* Card entrance animation */
-    .card {
-      opacity: 0;
-      transform: translateY(32px) scale(0.98);
-    }
-    
-    /* Stat card gradient border */
-    .stat-card {
-      position: relative;
-      background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--purple-primary), transparent, var(--pink-accent));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .stat-card:hover::before {
-      opacity: 0.15;
-    }
-    
-    .stat-card > * {
-      position: relative;
-      z-index: 1;
-    }
-    
-    /* Gradient text */
-    .gradient-text {
-      background: linear-gradient(135deg, var(--purple-primary), var(--pink-accent));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    /* Button glow effect */
-    .btn-glow {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-glow::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
-    .btn-glow:hover::before {
-      opacity: 1;
-    }
-    
-    /* Chart container */
-    .chart-container {
-      position: relative;
-      height: 220px;
-    }
-    
-    /* Activity feed item */
-    .feed-item {
-      opacity: 0;
-      transform: translateX(-20px);
-    }
-    
-    /* Table row */
-    .table-row {
-      opacity: 0;
-      transform: translateY(12px);
     }
     
     /* Progress bar gradient */
@@ -232,277 +116,337 @@
       background: linear-gradient(90deg, var(--purple-primary), var(--pink-accent));
     }
     
-    /* Platform badge */
+    /* Platform badges */
     .platform-badge {
+      display: inline-block;
       padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     
     /* Scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
     }
     
     ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 3px;
+      background: var(--bg-dark);
     }
     
     ::-webkit-scrollbar-thumb {
-      background: rgba(168, 85, 247, 0.3);
-      border-radius: 3px;
+      background: var(--border-hover);
+      border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(168, 85, 247, 0.5);
+      background: var(--text-muted);
     }
     
-    /* Glow effect on hover for cards */
-    .glow-on-hover {
-      transition: box-shadow 0.3s ease;
+    /* Tab styles */
+    .tab-button {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
     }
     
-    .glow-on-hover:hover {
-      box-shadow: 
-        0 0 40px rgba(168, 85, 247, 0.15),
-        0 0 80px rgba(124, 58, 237, 0.1);
+    .tab-button:hover {
+      color: var(--text-primary);
+    }
+    
+    .tab-button.active {
+      color: var(--purple-primary);
+      border-bottom-color: var(--purple-primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div id="main-content">
-    <!-- Top Bar -->
-    <header class="glass sticky top-0 z-50 border-b border-[var(--border)] mx-4 mt-4">
-      <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-3">
-            <div class="status-dot"></div>
-            <div>
-              <span class="font-bold text-[var(--text-primary)] text-xl tracking-tight">CELLTOPIA</span>
-              <span class="text-[var(--text-muted)] text-xs ml-2">// SALES COMMAND CENTER</span>
-            </div>
-          </div>
+  <!-- Top Bar -->
+  <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
+    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 bg-[var(--emerald-accent)] rounded-full animate-pulse"></div>
+          <span class="font-bold text-lg text-[var(--text-primary)] tracking-widest">CELLTOPIA</span>
         </div>
-        <div class="flex items-center gap-6 text-xs mono">
-          <div class="flex items-center gap-2">
-            <span class="text-[var(--text-muted)]">SYSTEM:</span>
-            <span class="text-[var(--emerald-accent)] font-medium">● ONLINE</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-[var(--text-muted)]">LAST SYNC:</span>
-            <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
-          </div>
-          <div class="px-3 py-1.5 bg-purple-900/30 border border-purple-700/50 rounded-full">
-            <span class="text-[var(--purple-primary)] font-medium" id="agentStatus">AUTOPILOT: ON</span>
-          </div>
+        <span class="text-xs text-[var(--text-muted)]">// SALES COMMAND CENTER</span>
+      </div>
+      <div class="flex items-center gap-6 text-xs font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">SYSTEM:</span>
+          <span class="text-[var(--emerald-accent)]">● ONLINE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">LAST SYNC:</span>
+          <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
+        </div>
+        <div class="px-3 py-1.5 bg-[var(--purple-primary)]/20 border border-[var(--purple-primary)]/40 rounded-lg">
+          <span class="text-[var(--purple-primary)] font-semibold">AUTOPILOT: ON</span>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <main class="max-w-[1600px] mx-auto px-6 py-8">
-      <!-- Stats Row -->
-      <div class="grid grid-cols-4 gap-4 mb-8" id="statsGrid">
-        <div class="stat-card p-5 card glow-on-hover" style="animation-delay: 0ms;">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Posts Today</div>
-            <div class="w-8 h-8 rounded-lg bg-purple-900/30 border border-purple-700/50 flex items-center justify-center">
-              <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
-              </svg>
-            </div>
-          </div>
-          <div class="text-4xl font-bold text-[var(--text-primary)] mb-2" id="postsToday">0</div>
-          <div class="text-xs text-[var(--text-muted)] mono" id="postsBreakdown">
-            <span class="text-[var(--blue-accent)]">FB: 0</span> · 
-            <span class="text-[var(--text-primary)]">TH: 0</span> · 
-            <span class="text-[var(--orange-accent)]">CR: 0</span>
-          </div>
+  <main class="max-w-[1600px] mx-auto px-6 py-6">
+    <!-- Stats Row -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">INVENTORY</div>
         </div>
-        
-        <div class="stat-card p-5 card glow-on-hover" style="animation-delay: 100ms;">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Inventory</div>
-            <div class="w-8 h-8 rounded-lg bg-blue-900/30 border border-blue-700/50 flex items-center justify-center">
-              <svg class="w-4 h-4 text-[var(--blue-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-            </div>
-          </div>
-          <div class="text-4xl font-bold text-[var(--text-primary)] mb-2" id="inventoryCount">0</div>
-          <div class="text-xs text-[var(--text-muted)] mono" id="inventoryStatus">
-            <span class="text-[var(--emerald-accent)]">IN: 0</span> · 
-            <span class="text-red-400">OUT: 0</span>
-          </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="inventoryCount">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
+      </div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--blue-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">POSTS TODAY</div>
         </div>
-        
-        <div class="stat-card p-5 card glow-on-hover" style="animation-delay: 200ms;">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Engagement</div>
-            <div class="w-8 h-8 rounded-lg bg-pink-900/30 border border-pink-700/50 flex items-center justify-center">
-              <svg class="w-4 h-4 text-[var(--pink-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="text-4xl font-bold text-[var(--text-primary)] mb-2" id="totalEngagement">0</div>
-          <div class="text-xs text-[var(--text-muted)] mono" id="engagementBreakdown">
-            👁 0 · 🔗 0 · 💬 0
-          </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="postsToday">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
+      </div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--pink-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">ENGAGEMENT</div>
         </div>
-        
-        <div class="stat-card p-5 card glow-on-hover" style="animation-delay: 300ms;">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-xs text-[var(--text-muted)] uppercase tracking-wider">Sales</div>
-            <div class="w-8 h-8 rounded-lg bg-emerald-900/30 border border-emerald-700/50 flex items-center justify-center">
-              <svg class="w-4 h-4 text-[var(--emerald-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="text-4xl font-bold text-[var(--emerald-accent)] mb-2" id="conversions">0</div>
-          <div class="text-xs text-[var(--text-muted)] mono" id="conversionRate">
-            RATE: 0%
-          </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="totalEngagement">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="engagementBreakdown"> 0 · 🔗 0 · 💬 0</div>
+      </div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--emerald-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">SALES</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--emerald-accent)]" id="conversions">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="conversionRate">RATE: 0%</div>
+      </div>
+    </div>
+
+    <!-- Token Usage Matrix -->
+    <div class="glass p-5 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">TOKEN USAGE</h3>
+          <p class="text-xs text-[var(--text-muted)] mt-1">Real-time AI agent token consumption</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <span class="text-[var(--text-muted)]">SESSION:</span>
+          <span id="tokenSession" class="text-[var(--purple-primary)]">0</span>
+          <span class="text-[var(--text-muted)]">| DAILY:</span>
+          <span id="tokenDaily" class="text-[var(--pink-accent)]">0</span>
         </div>
       </div>
-
-      <!-- Main Grid -->
-      <div class="grid grid-cols-3 gap-4 mb-8">
-        <!-- Activity Feed -->
-        <div class="col-span-2 glass p-5 card glow-on-hover" style="animation-delay: 400ms;">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-sm font-semibold text-[var(--text-primary)]">ACTIVITY FEED</h3>
-              <p class="text-xs text-[var(--text-muted)] mt-0.5">Real-time automation actions</p>
-            </div>
-            <button onclick="refreshData()" class="btn-glow px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition rounded-lg border border-transparent hover:border-[var(--border)]">
-              ↻ Refresh
-            </button>
-          </div>
-          <div class="space-y-2 max-h-80 overflow-y-auto" id="activityFeed">
-            <div class="feed-item text-xs text-[var(--text-muted)] mono py-4 text-center">
-              Waiting for activity...
-            </div>
-          </div>
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Scraping</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenScraping">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
         </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Content Gen</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenContent">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Posting</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenPosting">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Total</div>
+          <div class="text-lg font-mono text-[var(--purple-primary)]" id="tokenTotal">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
+        </div>
+      </div>
+      <div class="mt-4 h-2 bg-[var(--bg-dark)] rounded-full overflow-hidden">
+        <div id="tokenProgress" class="h-full progress-gradient rounded-full" style="width: 0%;"></div>
+      </div>
+      <div class="mt-2 flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
+        <span>Daily Limit: 1,000,000 tokens</span>
+        <span id="tokenPercentage">0% used</span>
+      </div>
+    </div>
 
-        <!-- Platform Performance -->
-        <div class="glass p-5 card glow-on-hover" style="animation-delay: 500ms;">
-          <div class="mb-4">
-            <h3 class="text-sm font-semibold text-[var(--text-primary)]">PLATFORM STATS</h3>
-            <p class="text-xs text-[var(--text-muted)] mt-0.5">Today's performance</p>
-          </div>
-          <div class="chart-container mb-4">
-            <canvas id="platformChart"></canvas>
-          </div>
-          <div class="space-y-2" id="platformStats">
-            <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--blue-accent); box-shadow: 0 0 10px var(--blue-accent);"></div>
-                <span class="text-[var(--text-secondary)]">Facebook</span>
-              </div>
-              <span class="text-[var(--text-primary)] mono font-medium" id="fbCount">0</span>
-            </div>
-            <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--text-primary); box-shadow: 0 0 10px rgba(255,255,255,0.5);"></div>
-                <span class="text-[var(--text-secondary)]">Threads</span>
-              </div>
-              <span class="text-[var(--text-primary)] mono font-medium" id="threadsCount">0</span>
-            </div>
-            <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border)]">
-              <div class="flex items-center gap-2">
-                <div class="w-2.5 h-2.5 rounded-full" style="background: var(--orange-accent); box-shadow: 0 0 10px var(--orange-accent);"></div>
-                <span class="text-[var(--text-secondary)]">Carousell</span>
-              </div>
-              <span class="text-[var(--text-primary)] mono font-medium" id="carousellCount">0</span>
-            </div>
-          </div>
+    <!-- Tabs -->
+    <div class="glass mb-6">
+      <div class="border-b border-[var(--border)] px-6">
+        <div class="flex gap-6">
+          <button class="tab-button active" onclick="switchTab('inventory')">INVENTORY</button>
+          <button class="tab-button" onclick="switchTab('posting')">POSTING LOG</button>
+          <button class="tab-button" onclick="switchTab('analytics')">ANALYTICS</button>
         </div>
       </div>
 
-      <!-- Task Board (Kanban) -->
-      <div class="glass p-5 mb-8 card glow-on-hover" style="animation-delay: 600ms;">
-        <div class="mb-4">
-          <h3 class="text-sm font-semibold text-[var(--text-primary)]">AUTOMATION QUEUE</h3>
-          <p class="text-xs text-[var(--text-muted)] mt-0.5">Current workflow status</p>
-        </div>
-        <div class="grid grid-cols-3 gap-4">
-          <!-- Pending -->
-          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">Queued</span>
-              <span class="px-2 py-0.5 bg-[var(--bg-dark)] border border-[var(--border)] rounded-full text-xs mono" id="pendingCount">0</span>
-            </div>
-            <div class="space-y-2" id="pendingTasks">
-              <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No queued tasks</div>
-            </div>
-          </div>
-          
-          <!-- In Progress -->
-          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">Running</span>
-              <span class="px-2 py-0.5 bg-purple-900/30 border border-purple-700/50 rounded-full text-xs mono text-[var(--purple-primary)]" id="progressCount">0</span>
-            </div>
-            <div class="space-y-2" id="progressTasks">
-              <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No active tasks</div>
-            </div>
-          </div>
-          
-          <!-- Done -->
-          <div class="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">Completed</span>
-              <span class="px-2 py-0.5 bg-emerald-900/30 border border-emerald-700/50 rounded-full text-xs mono text-[var(--emerald-accent)]" id="doneCount">0</span>
-            </div>
-            <div class="space-y-2" id="doneTasks">
-              <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No completed tasks</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent Posts Table -->
-      <div class="glass p-5 card glow-on-hover" style="animation-delay: 700ms;">
+      <!-- Inventory Tab -->
+      <div id="tab-inventory" class="tab-content active p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)]">POSTING LOG</h3>
-            <p class="text-xs text-[var(--text-muted)] mt-0.5">Recent listing activity</p>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">LIVE INVENTORY</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Real-time sync from Supabase (30 min auto-refresh)</p>
           </div>
-          <div class="flex items-center gap-2 text-xs text-[var(--text-muted)] mono">
-            <div class="w-2 h-2 rounded-full bg-[var(--emerald-accent)] animate-pulse"></div>
-            <span>LIVE UPDATES</span>
-          </div>
+          <button onclick="refreshData()" class="text-xs text-[var(--purple-primary)] hover:text-[var(--text-primary)] transition flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            REFRESH
+          </button>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-xs mono">
+          <table class="w-full text-xs font-mono">
             <thead>
               <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
-                <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Time</th>
-                <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Platform</th>
-                <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">iPhone Model</th>
-                <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Status</th>
-                <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Metrics</th>
+                <th class="text-left py-3 px-4 font-medium">DATE</th>
+                <th class="text-left py-3 px-4 font-medium">MODEL</th>
+                <th class="text-left py-3 px-4 font-medium">IPHONE</th>
+                <th class="text-left py-3 px-4 font-medium">PRICE</th>
+                <th class="text-left py-3 px-4 font-medium">DETAILS</th>
               </tr>
             </thead>
-            <tbody id="postsTable">
+            <tbody id="inventoryTable" class="text-[var(--text-secondary)]">
               <tr>
-                <td colspan="5" class="py-8 text-center text-[var(--text-muted)]">Waiting for posts...</td>
+                <td colspan="5" class="py-8 text-center">Loading inventory...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </main>
-  </div>
+
+      <!-- Posting Log Tab -->
+      <div id="tab-posting" class="tab-content p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">POSTING LOG</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Recent listing activity across platforms</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-[var(--emerald-accent)]">● LIVE UPDATES</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs font-mono">
+            <thead>
+              <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th class="text-left py-3 px-4 font-medium">TIME</th>
+                <th class="text-left py-3 px-4 font-medium">PLATFORM</th>
+                <th class="text-left py-3 px-4 font-medium">IPHONE MODEL</th>
+                <th class="text-left py-3 px-4 font-medium">STATUS</th>
+                <th class="text-left py-3 px-4 font-medium">METRICS</th>
+              </tr>
+            </thead>
+            <tbody id="postsTable" class="text-[var(--text-secondary)]">
+              <tr>
+                <td colspan="5" class="py-8 text-center">
+                  <div class="text-[var(--text-muted)]">No posts yet</div>
+                  <div class="text-[10px] mt-2">Automation will start once accounts are configured</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="tab-analytics" class="tab-content p-6">
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">PLATFORM PERFORMANCE</h3>
+            <canvas id="platformChart" height="200"></canvas>
+            <div class="mt-4 space-y-2" id="platformStats">
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Facebook</span>
+                <span class="text-[var(--text-primary)] font-mono" id="fbCount">0 posts</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Threads</span>
+                <span class="text-[var(--text-primary)] font-mono" id="threadsCount">0 posts</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Carousell</span>
+                <span class="text-[var(--text-primary)] font-mono" id="carousellCount">0 posts</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">ACTIVITY FEED</h3>
+            <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
+              <div class="text-xs text-[var(--text-muted)] font-mono">Waiting for activity...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Board -->
+    <div class="glass p-5">
+      <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">AUTOMATION QUEUE</h3>
+      <div class="grid grid-cols-3 gap-4">
+        <!-- Pending -->
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>PENDING</span>
+            <span class="px-1.5 py-0.5 bg-[var(--bg-card)] rounded font-mono" id="pendingCount">0</span>
+          </div>
+          <div class="space-y-2" id="pendingTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No pending tasks</div>
+          </div>
+        </div>
+        <!-- In Progress -->
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>IN PROGRESS</span>
+            <span class="px-1.5 py-0.5 bg-[var(--blue-accent)]/20 text-[var(--blue-accent)] rounded font-mono" id="progressCount">0</span>
+          </div>
+          <div class="space-y-2" id="progressTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No active tasks</div>
+          </div>
+        </div>
+        <!-- Done -->
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>DONE</span>
+            <span class="px-1.5 py-0.5 bg-[var(--emerald-accent)]/20 text-[var(--emerald-accent)] rounded font-mono" id="doneCount">0</span>
+          </div>
+          <div class="space-y-2" id="doneTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
 
   <script>
     // Supabase config - Friend's Celltopia inventory
@@ -512,44 +456,34 @@
     let platformChart;
     let isInitialized = false;
     let inventoryData = [];
+    let tokenUsage = {
+      scraping: 0,
+      content: 0,
+      posting: 0,
+      session: 0,
+      daily: 0
+    };
 
     document.addEventListener('DOMContentLoaded', () => {
       initChart();
       animateEntrance();
       refreshData();
       setInterval(refreshData, 1800000); // Auto-refresh every 30 minutes
+      setInterval(updateTokenUsage, 5000); // Simulate token updates every 5s
     });
 
-    // Staggered entrance animation with GSAP
-    function animateEntrance() {
-      gsap.to('.card', {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.7,
-        stagger: 0.1,
-        ease: 'power3.out',
-        delay: 0.1
-      });
+    // Tab switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // Initialize Chart with gradient
+    // Initialize chart
     function initChart() {
       const ctx = document.getElementById('platformChart').getContext('2d');
-      
-      // Create gradients
-      const gradientPurple = ctx.createLinearGradient(0, 0, 0, 220);
-      gradientPurple.addColorStop(0, 'rgba(168, 85, 247, 0.4)');
-      gradientPurple.addColorStop(1, 'rgba(168, 85, 247, 0)');
-      
-      const gradientPink = ctx.createLinearGradient(0, 0, 0, 220);
-      gradientPink.addColorStop(0, 'rgba(236, 72, 153, 0.4)');
-      gradientPink.addColorStop(1, 'rgba(236, 72, 153, 0)');
-      
-      const gradientOrange = ctx.createLinearGradient(0, 0, 0, 220);
-      gradientOrange.addColorStop(0, 'rgba(249, 115, 22, 0.4)');
-      gradientOrange.addColorStop(1, 'rgba(249, 115, 22, 0)');
-      
       platformChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -557,50 +491,70 @@
           datasets: [{
             label: 'Posts',
             data: [0, 0, 0],
-            backgroundColor: [gradientPurple, gradientPink, gradientOrange],
-            borderColor: ['#a855f7', '#ec4899', '#f97316'],
-            borderWidth: 2,
-            borderRadius: 10,
-            borderSkipped: false,
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.5)',
+              'rgba(255, 255, 255, 0.3)',
+              'rgba(246, 110, 12, 0.5)'
+            ],
+            borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
+            borderWidth: 1,
+            borderRadius: 6
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: {
-            duration: 1000,
-            easing: 'easeOutQuart',
-          },
           plugins: { 
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(3, 0, 20, 0.95)',
-              titleColor: '#ffffff',
-              bodyColor: '#a1a1aa',
-              borderColor: 'rgba(168, 85, 247, 0.3)',
-              borderWidth: 1,
-              padding: 14,
-              displayColors: true,
-              cornerRadius: 12,
-              titleFont: { family: 'Inter', size: 13, weight: '600' },
-              bodyFont: { family: 'JetBrains Mono', size: 12 },
-            }
+            legend: { display: false }
           },
           scales: {
             y: { 
               beginAtZero: true, 
-              grid: { color: 'rgba(255, 255, 255, 0.04)' },
-              ticks: { color: '#71717a', font: { family: 'JetBrains Mono', size: 11 } }
+              grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
+              ticks: { color: 'var(--text-muted)' } 
             },
             x: { 
-              grid: { display: false },
-              ticks: { color: '#71717a', font: { family: 'Inter', size: 12 } }
+              grid: { display: false }, 
+              ticks: { color: 'var(--text-muted)' } 
             }
           }
         }
       });
-      
-      isInitialized = true;
+    }
+
+    // Simulate token usage updates
+    function updateTokenUsage() {
+      // Simulate small token increases
+      tokenUsage.scraping += Math.floor(Math.random() * 50);
+      tokenUsage.content += Math.floor(Math.random() * 100);
+      tokenUsage.posting += Math.floor(Math.random() * 30);
+      tokenUsage.session = tokenUsage.scraping + tokenUsage.content + tokenUsage.posting;
+      tokenUsage.daily = tokenUsage.session; // For demo, same as session
+
+      // Update UI
+      document.getElementById('tokenScraping').textContent = tokenUsage.scraping.toLocaleString();
+      document.getElementById('tokenContent').textContent = tokenUsage.content.toLocaleString();
+      document.getElementById('tokenPosting').textContent = tokenUsage.posting.toLocaleString();
+      document.getElementById('tokenTotal').textContent = tokenUsage.session.toLocaleString();
+      document.getElementById('tokenSession').textContent = tokenUsage.session.toLocaleString();
+      document.getElementById('tokenDaily').textContent = tokenUsage.daily.toLocaleString();
+
+      // Update progress bar
+      const percentage = (tokenUsage.daily / 1000000) * 100;
+      document.getElementById('tokenProgress').style.width = `${percentage}%`;
+      document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
+    }
+
+    // Staggered entrance animation
+    function animateEntrance() {
+      gsap.from('.glass', {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power3.out',
+        delay: 0.2
+      });
     }
 
     // Refresh data from Supabase
@@ -701,7 +655,7 @@
       const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
       
       animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
-      document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
+      document.getElementById('engagementBreakdown').textContent = ` ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
       
       const conversions = Math.floor(totalMessages * 0.3);
       animateValue('conversions', conversions);
@@ -724,89 +678,37 @@
       document.getElementById('threadsCount').textContent = bySeries[14] || 0;
       document.getElementById('carousellCount').textContent = bySeries[15] || 0;
 
-      // Activity Feed
-      updateActivityFeed(inventory);
-      
-      // Posts Table - show recent inventory instead
+      // Update inventory table
       updateInventoryTable(inventory);
+      
+      // Update posts table (empty for now)
+      updatePostsTable(posts);
+      
+      // Activity Feed
+      updateActivityFeed(inventory, new Date().toLocaleTimeString('id-ID'), true);
       
       // Task Board
       updateTaskBoard();
     }
 
-    // Animate numeric values
-    function animateValue(elementId, value) {
+    // Animate value counter
+    function animateValue(elementId, target) {
       const element = document.getElementById(elementId);
       const current = parseInt(element.textContent.replace(/,/g, '')) || 0;
       
-      if (current === value) return;
-      
-      gsap.fromTo(element,
-        { textContent: current },
-        {
-          textContent: value,
-          duration: 0.8,
-          ease: 'power3.out',
-          snap: { textContent: 1 },
-          onUpdate: function() {
-            element.textContent = Math.round(this.targets()[0].textContent).toLocaleString();
-          }
-        }
-      );
-    }
-
-    // Update activity feed with inventory sync status
-    function updateActivityFeed(inventory = [], syncTime = new Date().toLocaleTimeString('id-ID'), success = true, errorMsg = '') {
-      const feedContainer = document.getElementById('activityFeed');
-      
-      let activities = [];
-      
-      if (success && inventory.length > 0) {
-        activities = [
-          { time: syncTime, action: `✓ Synced ${inventory.length} products from Supabase`, type: 'success' },
-          { time: syncTime, action: '→ Inventory data refreshed', type: 'info' },
-          { time: syncTime, action: '→ Auto-refresh in 30 min', type: 'info' },
-        ];
-      } else if (!success) {
-        activities = [
-          { time: syncTime, action: `✗ Sync failed: ${errorMsg || 'Connection error'}`, type: 'error' },
-          { time: syncTime, action: '→ Showing cached/demo data', type: 'warning' },
-          { time: syncTime, action: '→ Check browser console (F12) for details', type: 'warning' },
-        ];
-      } else {
-        activities = [
-          { time: syncTime, action: '→ Waiting for inventory sync...', type: 'info' },
-        ];
-      }
-      
-      feedContainer.innerHTML = activities.map((a, i) => {
-        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : 
-                          a.type === 'error' ? 'text-red-400' : 
-                          a.type === 'warning' ? 'text-orange-400' : 'text-[var(--text-secondary)]';
-        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
-        
-        return `
-        <div class="feed-item flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;">
-          <span class="text-[var(--text-muted)] mono">${a.time}</span>
-          <span class="${colorClass}">
-            ${icon} ${a.action}
-          </span>
-        </div>
-      `}).join('');
-      
-      gsap.to('.feed-item', {
-        opacity: 1,
-        x: 0,
-        duration: 0.4,
-        stagger: 0.08,
+      gsap.to({ value: current }, {
+        value: target,
+        duration: 0.8,
         ease: 'power3.out',
-        delay: 0.1
+        onUpdate: function() {
+          element.textContent = Math.round(this.targets()[0].value).toLocaleString();
+        }
       });
     }
 
-    // Update inventory table (replaces posts table)
+    // Update inventory table
     function updateInventoryTable(inventory) {
-      const tbody = document.getElementById('postsTable');
+      const tbody = document.getElementById('inventoryTable');
       
       if (inventory.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No inventory data</td></tr>';
@@ -820,8 +722,8 @@
         const condition = product.cas || '-';
         
         return `
-        <tr class="table-row border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
-          <td class="py-3 px-4 text-[var(--text-secondary)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
+          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
           <td class="py-3 px-4">
             <span class="platform-badge bg-purple-900/30 text-[var(--purple-primary)] border border-purple-700/50">
               iPhone ${product.series || '?'}
@@ -842,40 +744,116 @@
           </td>
         </tr>
       `}).join('');
+    }
+
+    // Update posts table
+    function updatePostsTable(posts) {
+      const tbody = document.getElementById('postsTable');
       
-      gsap.to('.table-row', {
-        opacity: 1,
-        y: 0,
-        duration: 0.3,
-        stagger: 0.05,
-        ease: 'power3.out',
-        delay: 0.1
-      });
+      if (posts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 text-center">
+              <div class="text-[var(--text-muted)]">No posts yet</div>
+              <div class="text-[10px] mt-2">Automation will start once accounts are configured</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
+          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">
+            <span class="platform-badge ${getPlatformClass(post.platform)}">
+              ${post.platform?.toUpperCase()}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50' : 'bg-red-900/30 text-red-400 border border-red-700/50'}">
+              ${post.status?.toUpperCase()}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-muted)]"> ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Get platform badge class
+    function getPlatformClass(platform) {
+      const classes = {
+        facebook: 'bg-blue-900/30 text-[var(--blue-accent)] border border-blue-700/50',
+        threads: 'bg-zinc-700/30 text-[var(--text-primary)] border border-zinc-600/50',
+        carousell: 'bg-orange-900/30 text-[var(--orange-accent)] border border-orange-700/50'
+      };
+      return classes[platform] || 'bg-zinc-800/30 text-[var(--text-muted)] border border-zinc-700/50';
+    }
+
+    // Update activity feed
+    function updateActivityFeed(inventory = [], syncTime = new Date().toLocaleTimeString('id-ID'), success = true, errorMsg = '') {
+      const feedContainer = document.getElementById('activityFeed');
+      
+      let activities = [];
+      
+      if (success && inventory.length > 0) {
+        activities = [
+          { time: syncTime, action: `✓ Synced ${inventory.length} products from Supabase`, type: 'success' },
+          { time: syncTime, action: '→ Inventory data refreshed', type: 'info' },
+          { time: syncTime, action: '→ Auto-refresh in 30 min', type: 'info' },
+        ];
+      } else if (!success) {
+        activities = [
+          { time: syncTime, action: `✗ Sync failed: ${errorMsg || 'Connection error'}`, type: 'error' },
+          { time: syncTime, action: '→ Showing cached/demo data', type: 'warning' },
+          { time: syncTime, action: '→ Check browser console (F12) for details', type: 'warning' },
+        ];
+      } else {
+        activities = [
+          { time: syncTime, action: '→ Waiting for activity...', type: 'info' },
+        ];
+      }
+      
+      feedContainer.innerHTML = activities.map((a, i) => {
+        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : 
+                          a.type === 'error' ? 'text-red-400' : 
+                          a.type === 'warning' ? 'text-orange-400' : 'text-[var(--text-secondary)]';
+        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
+        
+        return `
+        <div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;">
+          <span class="text-[var(--text-muted)] font-mono">${a.time}</span>
+          <span class="${colorClass}">
+            ${icon} ${a.action}
+          </span>
+        </div>
+      `}).join('');
     }
 
     // Update task board
     function updateTaskBoard() {
       document.getElementById('pendingCount').textContent = '3';
       document.getElementById('pendingTasks').innerHTML = `
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
           <div class="text-[var(--text-primary)] font-medium">Scrape inventory HTML</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">Next: 14:00</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Next: 14:00</div>
         </div>
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
           <div class="text-[var(--text-primary)] font-medium">Generate content variations</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">iPhone 15 Pro × 5</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">iPhone 15 Pro × 5</div>
         </div>
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
           <div class="text-[var(--text-primary)] font-medium">Post to 3 platforms</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">FB, Threads, Carousell</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">FB, Threads, Carousell</div>
         </div>
       `;
       
       document.getElementById('progressCount').textContent = '1';
       document.getElementById('progressTasks').innerHTML = `
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer border-l-2 border-[var(--purple-primary)]">
+        <div class="glass p-3 text-xs cursor-pointer border-l-2 border-[var(--purple-primary)]">
           <div class="text-[var(--text-primary)] font-medium">Posting to Facebook...</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">In progress</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">In progress</div>
           <div class="mt-2.5 h-1.5 bg-[var(--bg-dark)] rounded-full overflow-hidden">
             <div class="h-full progress-gradient rounded-full" style="width: 60%;"></div>
           </div>
@@ -884,36 +862,27 @@
       
       document.getElementById('doneCount').textContent = '9';
       document.getElementById('doneTasks').innerHTML = `
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer opacity-50">
+        <div class="glass p-3 text-xs opacity-60">
           <div class="text-[var(--emerald-accent)] line-through">Morning post batch</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">Completed: 09:00</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Completed: 09:00</div>
         </div>
-        <div class="glass rounded-lg p-3 text-xs cursor-pointer opacity-50">
+        <div class="glass p-3 text-xs opacity-60">
           <div class="text-[var(--emerald-accent)] line-through">Afternoon post batch</div>
-          <div class="text-[var(--text-muted)] mt-1.5 mono">Completed: 13:00</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Completed: 13:00</div>
         </div>
       `;
     }
 
-    // Get platform badge class
-    function getPlatformClass(platform) {
-      const classes = {
-        facebook: 'bg-blue-900/30 text-[var(--blue-accent)] border border-blue-700/50',
-        threads: 'bg-[var(--bg-dark)] text-[var(--text-primary)] border border-[var(--border)]',
-        carousell: 'bg-orange-900/30 text-[var(--orange-accent)] border border-orange-700/50'
-      };
-      return classes[platform] || 'bg-[var(--bg-dark)] text-[var(--text-muted)] border border-[var(--border)]';
-    }
-
-    // Demo data
+    // Show demo data (fallback)
     function showDemoData() {
-      const demoPosts = [
-        { platform: 'facebook', product_name: 'iPhone 15 Pro 256GB', status: 'success', views: 234, clicks: 28, messages: 8, created_at: new Date().toISOString() },
-        { platform: 'threads', product_name: 'iPhone 14 128GB', status: 'success', views: 189, clicks: 22, messages: 6, created_at: new Date().toISOString() },
-        { platform: 'carousell', product_name: 'iPhone 13 Pro 256GB', status: 'success', views: 156, clicks: 18, messages: 5, created_at: new Date().toISOString() },
-      ];
-      
-      updateDashboard(demoPosts);
+      document.getElementById('inventoryCount').textContent = '45';
+      document.getElementById('inventoryStatus').innerHTML = '<span class="text-[var(--emerald-accent)]">IN: 43</span> · <span class="text-red-400">OUT: 2</span>';
+      document.getElementById('postsToday').textContent = '0';
+      document.getElementById('postsBreakdown').innerHTML = 'FB: 0 · TH: 0 · CR: 0';
+      document.getElementById('totalEngagement').textContent = '0';
+      document.getElementById('engagementBreakdown').textContent = '👁 0 · 🔗 0 · 💬 0';
+      document.getElementById('conversions').textContent = '0';
+      document.getElementById('conversionRate').textContent = 'RATE: 0%';
     }
   </script>
 </body>
