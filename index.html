@@ -7,7 +7,6 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,9 +111,9 @@
       text-transform: uppercase;
     }
     
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--bg-dark); }
-    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
     
     .tab-button {
       padding: 10px 20px;
@@ -182,7 +181,7 @@
     
     .terminal-body {
       padding: 16px;
-      max-height: 240px;
+      max-height: 200px;
       overflow-y: auto;
       font-size: 11px;
       line-height: 1.8;
@@ -192,16 +191,6 @@
       display: flex;
       gap: 8px;
       margin-bottom: 4px;
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    
-    .terminal-line.visible {
-      animation: terminalReveal 0.4s ease forwards;
-    }
-    
-    @keyframes terminalReveal {
-      to { opacity: 1; transform: translateY(0); }
     }
     
     .terminal-prompt {
@@ -215,7 +204,6 @@
     .terminal-output.error { color: var(--pink-accent); }
     .terminal-output.info { color: var(--blue-accent); }
     
-    /* Alert Banner */
     .alert-banner {
       background: var(--alert-bg);
       border: 1px solid var(--alert-border);
@@ -274,7 +262,6 @@
       border-radius: 50%;
     }
     
-    /* Search & Filter */
     .search-bar {
       display: flex;
       gap: 8px;
@@ -314,7 +301,6 @@
       border-color: var(--purple-primary);
     }
     
-    /* Pagination */
     .pagination {
       display: flex;
       justify-content: center;
@@ -350,7 +336,6 @@
       color: var(--text-muted);
     }
     
-    /* Responsive */
     @media (max-width: 1024px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .token-grid { grid-template-columns: repeat(2, 1fr); }
@@ -401,7 +386,7 @@
       <div id="alertList" class="alert-list"></div>
     </div>
 
-    <!-- Stats Row - Visual Hierarchy: Inventory is primary -->
+    <!-- Stats Row -->
     <div class="stats-grid grid grid-cols-4 gap-4 mb-6">
       <div class="glass p-6" style="grid-column: span 2;">
         <div class="flex items-center justify-between mb-3">
@@ -487,7 +472,7 @@
       </div>
     </div>
 
-    <!-- Live Terminal (Collapsible) -->
+    <!-- Live Terminal (Lightweight) -->
     <div class="terminal mb-6">
       <div class="terminal-header">
         <div class="terminal-title">Live Terminal Feed</div>
@@ -504,7 +489,7 @@
       <div id="terminalBody" class="terminal-body">
         <div class="terminal-line">
           <span class="terminal-prompt">celltopia@sys:~$</span>
-          <span class="terminal-command">Initializing dashboard...</span>
+          <span class="terminal-command">Dashboard ready</span>
         </div>
       </div>
     </div>
@@ -612,16 +597,16 @@
         </div>
       </div>
 
-      <!-- Analytics Tab -->
+      <!-- Analytics Tab (Lazy Load) -->
       <div id="tab-analytics" class="tab-content p-6">
         <div class="grid grid-cols-2 gap-6">
           <div>
             <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">PLATFORM PERFORMANCE</h3>
-            <canvas id="platformChart" height="200"></canvas>
+            <div style="height:200px"><canvas id="platformChart"></canvas></div>
           </div>
           <div>
             <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">INVENTORY TREND</h3>
-            <canvas id="trendChart" height="200"></canvas>
+            <div style="height:200px"><canvas id="trendChart"></canvas></div>
             <div class="mt-4 text-xs text-[var(--text-muted)]">
               <div class="flex items-center gap-2 mb-2">
                 <span class="w-3 h-3 bg-[var(--purple-primary)] rounded-sm"></span>
@@ -676,7 +661,8 @@
     const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
-    let platformChart, trendChart;
+    let platformChart = null;
+    let trendChart = null;
     let inventoryData = [];
     let filteredInventory = [];
     let previousInventory = [];
@@ -688,27 +674,42 @@
     const itemsPerPage = 15;
     let terminalCollapsed = false;
     let inventoryHistory = [];
+    let chartsInitialized = false;
+    let analyticsTabLoaded = false;
+
+    // Throttle token updates (every 5s instead of 1s)
+    let lastTokenUpdate = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
-      initCharts();
-      animateEntrance();
-      addTerminalLine('system', 'Dashboard initialized');
+      addTerminalLine('system', 'Dashboard ready');
       addTerminalLine('system', 'Sync interval: 60 seconds');
       addTerminalLine('system', 'Alert monitoring: SOLD + NEW STOCK');
-      addTerminalLine('system', 'Connecting to Supabase...');
       
       refreshData();
       setInterval(refreshData, 60000);
       
+      // Throttled token counter (5s instead of 1s)
       setInterval(() => {
-        const totalTokens = apiCalls + llmTokens;
-        document.getElementById('tokenSession').textContent = totalTokens.toLocaleString();
-        document.getElementById('tokenDaily').textContent = totalTokens.toLocaleString();
-      }, 1000);
+        const now = Date.now();
+        if (now - lastTokenUpdate > 5000) {
+          updateTokenUsage();
+          lastTokenUpdate = now;
+        }
+      }, 5000);
+
+      // Lazy load charts only when analytics tab is clicked
+      document.querySelector('button[onclick="switchTab(\'analytics\')"]').addEventListener('click', () => {
+        if (!analyticsTabLoaded) {
+          initCharts();
+          analyticsTabLoaded = true;
+        }
+      });
     });
 
     function addTerminalLine(type, message) {
       const feed = document.getElementById('terminalBody');
+      if (!feed) return;
+      
       let prompt = 'celltopia@sys:~$';
       let cmdClass = 'terminal-command';
       
@@ -721,14 +722,16 @@
       line.className = 'terminal-line';
       line.innerHTML = `<span class="terminal-prompt">${prompt}</span><span class="${cmdClass}">${message}</span>`;
       feed.appendChild(line);
-      setTimeout(() => line.classList.add('visible'), 10);
       feed.scrollTop = feed.scrollHeight;
-      if (feed.children.length > 50) feed.removeChild(feed.children[0]);
+      
+      // Keep only 20 lines (was 50) - less DOM
+      if (feed.children.length > 20) feed.removeChild(feed.children[0]);
     }
 
     function toggleTerminal() {
       const body = document.getElementById('terminalBody');
       const text = document.getElementById('terminalToggleText');
+      if (!body || !text) return;
       terminalCollapsed = !terminalCollapsed;
       body.style.display = terminalCollapsed ? 'none' : 'block';
       text.textContent = terminalCollapsed ? 'EXPAND' : 'COLLAPSE';
@@ -739,72 +742,82 @@
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
       event.target.classList.add('active');
       document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      // Lazy load charts when switching to analytics
+      if (tabName === 'analytics' && !chartsInitialized) {
+        initCharts();
+        chartsInitialized = true;
+      }
     }
 
+    // Lightweight charts - no animations
     function initCharts() {
-      const ctx1 = document.getElementById('platformChart').getContext('2d');
-      platformChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Facebook', 'Threads', 'Carousell'],
-          datasets: [{
-            label: 'Posts',
-            data: [0, 0, 0],
-            backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(255, 255, 255, 0.3)', 'rgba(246, 110, 12, 0.5)'],
-            borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
-            borderWidth: 1,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } },
-            x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } }
+      if (platformChart || trendChart) return;
+      
+      const ctx1 = document.getElementById('platformChart');
+      if (ctx1) {
+        platformChart = new Chart(ctx1.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Facebook', 'Threads', 'Carousell'],
+            datasets: [{
+              label: 'Posts',
+              data: [0, 0, 0],
+              backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(255, 255, 255, 0.3)', 'rgba(246, 110, 12, 0.5)'],
+              borderWidth: 0,
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // No animation
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, grid: { display: false }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } }
+            }
           }
-        }
-      });
+        });
+      }
 
-      const ctx2 = document.getElementById('trendChart').getContext('2d');
-      trendChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          datasets: [{
-            label: 'Inventory',
-            data: [0, 0, 0, 0, 0, 0, 0],
-            borderColor: '#a855f7',
-            backgroundColor: 'rgba(168, 85, 247, 0.1)',
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } },
-            x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } }
+      const ctx2 = document.getElementById('trendChart');
+      if (ctx2) {
+        trendChart = new Chart(ctx2.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+              label: 'Inventory',
+              data: [0, 0, 0, 0, 0, 0, 0],
+              borderColor: '#a855f7',
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 0 // No points
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // No animation
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { grid: { display: false }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } }
+            }
           }
-        }
-      });
-    }
-
-    function animateEntrance() {
-      gsap.from('.glass', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
-      gsap.from('.terminal', { opacity: 0, y: 20, duration: 0.5, ease: 'power3.out', delay: 0.4 });
+        });
+      }
     }
 
     async function refreshData() {
       const syncTime = new Date().toLocaleTimeString('id-ID');
-      document.getElementById('lastSync').textContent = syncTime;
+      const lastSyncEl = document.getElementById('lastSync');
+      if (lastSyncEl) lastSyncEl.textContent = syncTime;
 
       try {
         apiCalls++;
-        addTerminalLine('command', `fetch products?sold=eq.false --supabase`);
+        addTerminalLine('command', `fetch products --supabase`);
         const startTime = performance.now();
         
         const response = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
@@ -821,18 +834,14 @@
         totalProductsFetched = inventory.length;
         currentPage = 1;
 
-        addTerminalLine('success', `Synced ${inventory.length} products in ${duration}ms`);
+        addTerminalLine('success', `Synced ${inventory.length} products (${duration}ms)`);
         
-        // Check for alerts
         checkInventoryAlerts(previousInventory, inventory);
-        
-        // Update trend history
         updateTrendHistory(inventory.length);
-
         updateTokenUsage();
         updateDashboard([], inventory);
         updateActivityFeed(inventory, syncTime, true);
-        addTerminalLine('system', `Dashboard updated successfully`);
+        addTerminalLine('system', `Dashboard updated`);
 
       } catch (error) {
         console.error('Fetch error:', error);
@@ -848,7 +857,6 @@
       if (!banner || !alertList) return;
       
       const alerts = [];
-      
       const currentIds = new Set(current.map(p => p.id));
       const previousIds = new Set(previous.map(p => p.id));
       
@@ -873,7 +881,7 @@
         });
         alertList.innerHTML = html;
         banner.classList.add('visible');
-        addTerminalLine('info', `Alert: ${alerts.length} inventory change(s) detected`);
+        addTerminalLine('info', `Alert: ${alerts.length} change(s)`);
       } else {
         banner.classList.remove('visible');
       }
@@ -883,106 +891,108 @@
       inventoryHistory.push(count);
       if (inventoryHistory.length > 7) inventoryHistory.shift();
       
-      trendChart.data.datasets[0].data = inventoryHistory;
-      trendChart.update('default');
+      if (trendChart) {
+        trendChart.data.datasets[0].data = inventoryHistory;
+        trendChart.update('none'); // No animation
+      }
       
-      document.getElementById('trendCurrent').textContent = count;
-      if (inventoryHistory.length > 1) {
+      const currentEl = document.getElementById('trendCurrent');
+      const changeEl = document.getElementById('trendChange');
+      if (currentEl) currentEl.textContent = count;
+      if (changeEl && inventoryHistory.length > 1) {
         const change = count - inventoryHistory[0];
-        const changeEl = document.getElementById('trendChange');
         changeEl.textContent = `${change > 0 ? '+' : ''}${change}`;
         changeEl.style.color = change >= 0 ? 'var(--emerald-accent)' : 'var(--pink-accent)';
       }
     }
 
     function updateTokenUsage() {
-      const scrapingEl = document.getElementById('tokenScraping');
-      const llmEl = document.getElementById('tokenLLM');
-      const contentEl = document.getElementById('tokenContent');
-      const postingEl = document.getElementById('tokenPosting');
-      const sessionEl = document.getElementById('tokenSession');
-      const dailyEl = document.getElementById('tokenDaily');
-      const progressEl = document.getElementById('tokenProgress');
-      const percentageEl = document.getElementById('tokenPercentage');
+      const els = {
+        scraping: document.getElementById('tokenScraping'),
+        llm: document.getElementById('tokenLLM'),
+        content: document.getElementById('tokenContent'),
+        posting: document.getElementById('tokenPosting'),
+        session: document.getElementById('tokenSession'),
+        daily: document.getElementById('tokenDaily'),
+        progress: document.getElementById('tokenProgress'),
+        percentage: document.getElementById('tokenPercentage')
+      };
       
-      if (!scrapingEl || !llmEl || !contentEl || !postingEl || !sessionEl || !dailyEl || !progressEl || !percentageEl) return;
-      
-      scrapingEl.textContent = apiCalls.toLocaleString();
-      llmEl.textContent = llmTokens.toLocaleString();
-      contentEl.textContent = totalProductsFetched.toLocaleString();
-      postingEl.textContent = postsCreated.toLocaleString();
+      if (!els.scraping || !els.session) return;
       
       const totalTokens = apiCalls + llmTokens;
-      sessionEl.textContent = totalTokens.toLocaleString();
-      dailyEl.textContent = totalTokens.toLocaleString();
+      els.scraping.textContent = apiCalls.toLocaleString();
+      if (els.llm) els.llm.textContent = llmTokens.toLocaleString();
+      if (els.content) els.content.textContent = totalProductsFetched.toLocaleString();
+      if (els.posting) els.posting.textContent = postsCreated.toLocaleString();
+      els.session.textContent = totalTokens.toLocaleString();
+      if (els.daily) els.daily.textContent = totalTokens.toLocaleString();
 
       const percentage = (apiCalls / 1000) * 100;
-      progressEl.style.width = `${Math.min(percentage, 100)}%`;
-      percentageEl.textContent = `${percentage.toFixed(2)}% used`;
+      if (els.progress) els.progress.style.width = `${Math.min(percentage, 100)}%`;
+      if (els.percentage) els.percentage.textContent = `${percentage.toFixed(0)}%`;
     }
 
     function updateDashboard(posts, inventory = []) {
-      const inventoryCountEl = document.getElementById('inventoryCount');
-      const inStockEl = document.getElementById('inStockCount');
-      const soldEl = document.getElementById('soldCount');
-      const postsTodayEl = document.getElementById('postsToday');
-      const postsBreakdownEl = document.getElementById('postsBreakdown');
-      const engagementEl = document.getElementById('totalEngagement');
-      const engagementBreakdownEl = document.getElementById('engagementBreakdown');
+      const els = {
+        inventoryCount: document.getElementById('inventoryCount'),
+        inStock: document.getElementById('inStockCount'),
+        sold: document.getElementById('soldCount'),
+        postsToday: document.getElementById('postsToday'),
+        postsBreakdown: document.getElementById('postsBreakdown'),
+        engagement: document.getElementById('totalEngagement'),
+        engagementBreakdown: document.getElementById('engagementBreakdown')
+      };
       
-      if (!inventoryCountEl || !inStockEl || !soldEl) return;
+      if (!els.inventoryCount) return;
       
       const totalInventory = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
       const sold = inventory.filter(p => p.stock <= 0).length;
 
-      animateValue('inventoryCount', totalInventory);
-      inStockEl.textContent = inStock;
-      soldEl.textContent = sold;
+      els.inventoryCount.textContent = totalInventory.toLocaleString();
+      if (els.inStock) els.inStock.textContent = inStock;
+      if (els.sold) els.sold.textContent = sold;
 
       const today = new Date().toDateString();
       const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
-      const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
-      const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
-      const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
+      
+      if (els.postsToday) els.postsToday.textContent = todayPosts.length;
+      if (els.postsBreakdown) {
+        const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
+        const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
+        const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
+        els.postsBreakdown.innerHTML = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
+      }
 
-      if (postsTodayEl) animateValue('postsToday', todayPosts.length);
-      if (postsBreakdownEl) postsBreakdownEl.innerHTML = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
-
-      const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
-      const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
-      const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
-
-      if (engagementEl) animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
-      if (engagementBreakdownEl) engagementBreakdownEl.textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
+      if (els.engagement) els.engagement.textContent = '0';
+      if (els.engagementBreakdown) els.engagementBreakdown.textContent = '👁 0 · 🔗 0 · 💬 0';
 
       updateInventoryTable(filteredInventory);
       updateTaskBoard();
     }
 
-    function animateValue(id, target) {
-      const el = document.getElementById(id);
-      const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
-      gsap.to({ value: current }, {
-        value: target, duration: 0.8, ease: 'power3.out',
-        onUpdate: function() { el.textContent = Math.round(this.targets()[0].value).toLocaleString(); }
-      });
-    }
-
     function filterInventory() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const series = document.getElementById('seriesFilter').value;
-      const warranty = document.getElementById('warrantyFilter').value;
-      const price = document.getElementById('priceFilter').value;
+      const search = document.getElementById('searchInput');
+      const series = document.getElementById('seriesFilter');
+      const warranty = document.getElementById('warrantyFilter');
+      const price = document.getElementById('priceFilter');
+      
+      if (!search || !series || !warranty || !price) return;
+      
+      const searchVal = search.value.toLowerCase();
+      const seriesVal = series.value;
+      const warrantyVal = warranty.value;
+      const priceVal = price.value;
 
       filteredInventory = inventoryData.filter(p => {
-        const matchSearch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.series && p.series.includes(search));
-        const matchSeries = series === 'all' || (p.series && p.series === series);
-        const matchWarranty = warranty === 'all' || (warranty === 'ibox' && p.warranty) || (warranty === 'bc' && !p.warranty);
-        const matchPrice = price === 'all' || 
-          (price === 'low' && p.price < 8000000) ||
-          (price === 'mid' && p.price >= 8000000 && p.price <= 15000000) ||
-          (price === 'high' && p.price > 15000000);
+        const matchSearch = !searchVal || (p.name && p.name.toLowerCase().includes(searchVal)) || (p.series && p.series.includes(searchVal));
+        const matchSeries = seriesVal === 'all' || (p.series && p.series === seriesVal);
+        const matchWarranty = warrantyVal === 'all' || (warrantyVal === 'ibox' && p.warranty) || (warrantyVal === 'bc' && !p.warranty);
+        const matchPrice = priceVal === 'all' || 
+          (priceVal === 'low' && p.price < 8000000) ||
+          (priceVal === 'mid' && p.price >= 8000000 && p.price <= 15000000) ||
+          (priceVal === 'high' && p.price > 15000000);
         
         return matchSearch && matchSeries && matchWarranty && matchPrice;
       });
@@ -993,6 +1003,8 @@
 
     function updateInventoryTable(inventory) {
       const tbody = document.getElementById('inventoryTable');
+      if (!tbody) return;
+      
       if (inventory.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No products match your filters</td></tr>';
         updatePagination(0);
@@ -1004,7 +1016,7 @@
       const end = start + itemsPerPage;
       const pageData = inventory.slice(start, end);
 
-      tbody.innerHTML = pageData.map((product, i) => {
+      tbody.innerHTML = pageData.map(product => {
         const warrantyBadge = product.warranty ? 'iBox' : 'BC';
         const batteryHealth = product.battery ? `${product.battery}%` : '-';
         
@@ -1023,7 +1035,6 @@
           </td>
           <td class="py-3 px-4 text-[var(--text-muted)]">
             🔋 ${batteryHealth} · ${warrantyBadge}
-            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${product.cas || ''}">${product.cas || '-'}</div>
           </td>
         </tr>
       `}).join('');
@@ -1033,17 +1044,18 @@
 
     function updatePagination(totalPages) {
       const pagination = document.getElementById('pagination');
+      if (!pagination) return;
+      
       if (totalPages <= 1) {
         pagination.innerHTML = '';
         return;
       }
 
-      let html = `
+      pagination.innerHTML = `
         <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
         <span class="page-info">Page ${currentPage} of ${totalPages}</span>
         <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>
       `;
-      pagination.innerHTML = html;
     }
 
     function changePage(page) {
@@ -1068,25 +1080,29 @@
     }
 
     function updateTaskBoard() {
-      document.getElementById('pendingCount').textContent = '3';
-      document.getElementById('pendingTasks').innerHTML = `
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Scrape inventory</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Next: 60s</div>
+      const pendingCount = document.getElementById('pendingCount');
+      const pendingTasks = document.getElementById('pendingTasks');
+      const progressCount = document.getElementById('progressCount');
+      const progressTasks = document.getElementById('progressTasks');
+      const doneCount = document.getElementById('doneCount');
+      const doneTasks = document.getElementById('doneTasks');
+      
+      if (pendingCount) pendingCount.textContent = '1';
+      if (pendingTasks) pendingTasks.innerHTML = `
+        <div class="glass p-3 text-xs">
+          <div class="text-[var(--text-primary)] font-medium">Next sync</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">In 60s</div>
         </div>
       `;
-      document.getElementById('progressCount').textContent = '1';
-      document.getElementById('progressTasks').innerHTML = `
-        <div class="glass p-3 text-xs cursor-pointer border-l-2 border-[var(--purple-primary)]">
-          <div class="text-[var(--text-primary)] font-medium">Syncing inventory...</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">In progress</div>
-          <div class="mt-2.5 h-1.5 bg-[var(--bg-dark)] rounded-full overflow-hidden">
-            <div class="h-full progress-gradient rounded-full" style="width: 100%;"></div>
-          </div>
+      if (progressCount) progressCount.textContent = '1';
+      if (progressTasks) progressTasks.innerHTML = `
+        <div class="glass p-3 text-xs border-l-2 border-[var(--purple-primary)]">
+          <div class="text-[var(--text-primary)] font-medium">Monitoring inventory</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Active</div>
         </div>
       `;
-      document.getElementById('doneCount').textContent = '0';
-      document.getElementById('doneTasks').innerHTML = `<div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>`;
+      if (doneCount) doneCount.textContent = '0';
+      if (doneTasks) doneTasks.innerHTML = `<div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>`;
     }
   </script>
 </body>
