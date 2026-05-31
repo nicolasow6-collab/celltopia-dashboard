@@ -776,7 +776,8 @@
       updateApiMetricsDisplay();
       
       refreshData();
-      setInterval(refreshData, 60000);
+      // Auto-refresh disabled - manual refresh only to save tokens
+      // setInterval(refreshData, 60000);
       
       // GSAP entrance animations for cards
       gsap.from('.stat-card', { duration: 0.5, y: 20, opacity: 0, stagger: 0.1, ease: 'power2.out' });
