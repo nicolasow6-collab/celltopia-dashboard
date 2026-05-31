@@ -388,8 +388,8 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="stats-grid grid grid-cols-4 gap-4 mb-6">
-      <div class="glass p-6" style="grid-column: span 2;">
+    <div class="stats-grid grid grid-cols-5 gap-4 mb-6">
+      <div class="glass p-6 stat-card" style="grid-column: span 2;">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +405,7 @@
           <div><span class="text-red-400">SOLD:</span> <span id="soldCount" class="text-[var(--text-primary)]">0</span></div>
         </div>
       </div>
-      <div class="glass p-5">
+      <div class="glass p-5 stat-card">
         <div class="flex items-center gap-2 mb-2">
           <svg class="w-4 h-4 text-[var(--blue-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
@@ -415,7 +415,17 @@
         <div class="text-3xl font-bold text-[var(--text-primary)]" id="postsToday">0</div>
         <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
       </div>
-      <div class="glass p-5">
+      <div class="glass p-5 stat-card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.1)); border-color: rgba(168, 85, 247, 0.3);">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">API CALLS</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="statApiCalls">0</div>
+        <div class="text-[10px] text-[var(--text-muted)] mt-2 font-mono"><span id="statApiDays">0</span> days · <span id="statApiSince">0</span> active</div>
+      </div>
+      <div class="glass p-5 stat-card">
         <div class="flex items-center gap-2 mb-2">
           <svg class="w-4 h-4 text-[var(--pink-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
