@@ -648,11 +648,14 @@
         totalProductsFetched = inventory.length;
 
         addTerminalLine('success', `Synced ${inventory.length} products in ${duration}ms`);
-        addTerminalLine('system', `Next sync: 60 seconds`);
+        addTerminalLine('system', `Data: ${inventory.length} units, updating dashboard...`);
 
+        // Force update dashboard with fetched data
+        updateDashboard([], inventory);
         updateTokenUsage();
-        updateDashboard(inventory, syncTime);
         updateActivityFeed(inventory, syncTime, true);
+
+        addTerminalLine('system', `Dashboard updated successfully`);
 
       } catch (error) {
         console.error('Fetch error:', error);
@@ -677,11 +680,16 @@
       document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
     }
 
-    // Update dashboard
+    // Update dashboard with real inventory data
     function updateDashboard(posts, inventory = []) {
+      console.log('updateDashboard called with inventory:', inventory.length);
+      
+      // Inventory stats
       const totalInventory = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
       const outOfStock = inventory.filter(p => p.stock <= 0).length;
+
+      console.log('Inventory counts:', { totalInventory, inStock, outOfStock });
 
       const bySeries = {};
       inventory.forEach(p => {
@@ -695,8 +703,10 @@
       const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
       const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
+      // Update inventory stat
       animateValue('inventoryCount', totalInventory);
       document.getElementById('inventoryStatus').innerHTML = `<span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · <span class="text-red-400">OUT: ${outOfStock}</span>`;
+      console.log('Inventory stat updated:', totalInventory);
 
       animateValue('postsToday', todayPosts.length);
       document.getElementById('postsBreakdown').innerHTML = `<span class="text-[var(--blue-accent)]">FB: ${fbPosts}</span> · <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · <span class="text-[var(--orange-accent)]">CR: ${carousellPosts}</span>`;
