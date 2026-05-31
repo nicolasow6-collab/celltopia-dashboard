@@ -505,18 +505,19 @@
   </div>
 
   <script>
-    // Supabase config
-    const SUPABASE_URL = 'https://pmuerxjfijrktobzifxk.supabase.co';
-    const SUPABASE_KEY = 'YOUR_ANON_KEY';
+    // Supabase config - Friend's Celltopia inventory
+    const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
     let platformChart;
     let isInitialized = false;
+    let inventoryData = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       initChart();
       animateEntrance();
       refreshData();
-      setInterval(refreshData, 30000);
+      setInterval(refreshData, 1800000); // Auto-refresh every 30 minutes
     });
 
     // Staggered entrance animation with GSAP
@@ -602,7 +603,7 @@
       isInitialized = true;
     }
 
-    // Refresh data
+    // Refresh data from Supabase
     async function refreshData() {
       gsap.fromTo('#lastSync', 
         { opacity: 0.5 },
@@ -612,39 +613,63 @@
       document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
       
       try {
+        // Fetch inventory from Supabase
+        const inventoryResponse = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const inventory = await inventoryResponse.json();
+        inventoryData = inventory;
+        
+        // Fetch posts (for analytics - will be empty initially)
         const postsResponse = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=50`, {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
         const posts = await postsResponse.json();
-        updateDashboard(posts);
+        
+        updateDashboard(posts, inventory);
       } catch (error) {
+        console.error('Fetch error:', error);
         showDemoData();
       }
     }
 
-    // Update dashboard
-    function updateDashboard(posts) {
+    // Update dashboard with real inventory data
+    function updateDashboard(posts, inventory = []) {
+      // Inventory stats
+      const totalInventory = inventory.length;
+      const inStock = inventory.filter(p => p.stock > 0).length;
+      const outOfStock = inventory.filter(p => p.stock <= 0).length;
+      
+      // Group by series
+      const bySeries = {};
+      inventory.forEach(p => {
+        const series = p.series || 'Unknown';
+        bySeries[series] = (bySeries[series] || 0) + 1;
+      });
+      
+      // Posts stats (for automation tracking - will be empty initially)
       const today = new Date().toDateString();
       const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
-      
       const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
       const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
       const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      // Animate stat numbers
+      // Update stats with inventory data
+      animateValue('inventoryCount', totalInventory);
+      document.getElementById('inventoryStatus').innerHTML = `
+        <span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · 
+        <span class="text-red-400">OUT: ${outOfStock}</span>
+      `;
+      
+      // Posts stat (show 0 initially since automation not running yet)
       animateValue('postsToday', todayPosts.length);
       document.getElementById('postsBreakdown').innerHTML = `
         <span class="text-[var(--blue-accent)]">FB: ${fbPosts}</span> · 
         <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · 
         <span class="text-[var(--orange-accent)]">CR: ${carousellPosts}</span>
       `;
-      
-      animateValue('inventoryCount', 24);
-      document.getElementById('inventoryStatus').innerHTML = `
-        <span class="text-[var(--emerald-accent)]">IN: 22</span> · 
-        <span class="text-red-400">OUT: 2</span>
-      `;
 
+      // Engagement (placeholder until posting starts)
       const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
       const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
       const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
@@ -656,22 +681,28 @@
       animateValue('conversions', conversions);
       document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
 
-      // Update chart
+      // Update chart with inventory by series
       if (isInitialized) {
-        platformChart.data.datasets[0].data = [fbPosts, threadsPosts, carousellPosts];
+        // Show top 3 iPhone series by count
+        const sortedSeries = Object.entries(bySeries)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+        const chartData = sortedSeries.map(([, count]) => count);
+        platformChart.data.labels = sortedSeries.map(([series]) => `iPhone ${series}`);
+        platformChart.data.datasets[0].data = chartData;
         platformChart.update('default');
       }
       
-      // Update platform stats
-      document.getElementById('fbCount').textContent = fbPosts;
-      document.getElementById('threadsCount').textContent = threadsPosts;
-      document.getElementById('carousellCount').textContent = carousellPosts;
+      // Update platform stats (show inventory distribution instead)
+      document.getElementById('fbCount').textContent = bySeries[13] || 0;
+      document.getElementById('threadsCount').textContent = bySeries[14] || 0;
+      document.getElementById('carousellCount').textContent = bySeries[15] || 0;
 
       // Activity Feed
-      updateActivityFeed();
+      updateActivityFeed(inventory);
       
-      // Posts Table
-      updatePostsTable(posts);
+      // Posts Table - show recent inventory instead
+      updateInventoryTable(inventory);
       
       // Task Board
       updateTaskBoard();
@@ -698,17 +729,15 @@
       );
     }
 
-    // Update activity feed
-    function updateActivityFeed() {
+    // Update activity feed with inventory sync status
+    function updateActivityFeed(inventory = []) {
       const feedContainer = document.getElementById('activityFeed');
       const now = new Date().toLocaleTimeString('id-ID');
       
       const activities = [
-        { time: now, action: 'Scraping iPhone inventory from HTML...', type: 'info' },
-        { time: now, action: 'Generated 5 listing variations for iPhone 15 Pro', type: 'success' },
-        { time: now, action: 'Posted to Facebook Marketplace', type: 'success' },
-        { time: now, action: 'Posted to Threads', type: 'success' },
-        { time: now, action: 'Posted to Carousell', type: 'success' },
+        { time: now, action: `Synced ${inventory.length} products from Supabase`, type: 'success' },
+        { time: now, action: 'Inventory data refreshed', type: 'info' },
+        { time: now, action: 'Dashboard auto-updated (30 min interval)', type: 'info' },
       ];
       
       feedContainer.innerHTML = activities.map((a, i) => `
@@ -730,32 +759,44 @@
       });
     }
 
-    // Update posts table
-    function updatePostsTable(posts) {
+    // Update inventory table (replaces posts table)
+    function updateInventoryTable(inventory) {
       const tbody = document.getElementById('postsTable');
       
-      if (posts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No posts yet</td></tr>';
+      if (inventory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No inventory data</td></tr>';
         return;
       }
       
-      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
+      // Show latest 10 products
+      tbody.innerHTML = inventory.slice(0, 10).map((product, i) => {
+        const warrantyBadge = product.warranty ? 'iBox' : 'BC';
+        const batteryHealth = product.battery ? `${product.battery}%` : '-';
+        const condition = product.cas || '-';
+        
+        return `
         <tr class="table-row border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
-          <td class="py-3 px-4 text-[var(--text-secondary)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 text-[var(--text-secondary)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
           <td class="py-3 px-4">
-            <span class="platform-badge ${getPlatformClass(post.platform)}">
-              ${post.platform?.toUpperCase()}
+            <span class="platform-badge bg-purple-900/30 text-[var(--purple-primary)] border border-purple-700/50">
+              iPhone ${product.series || '?'}
             </span>
           </td>
-          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">
+            ${product.name || 'Unknown'}
+            <div class="text-[10px] text-[var(--text-muted)] mt-0.5">${product.storage || ''} · ${product.color || ''}</div>
+          </td>
           <td class="py-3 px-4">
-            <span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50' : 'bg-red-900/30 text-red-400 border border-red-700/50'}">
-              ${post.status?.toUpperCase()}
+            <span class="px-2 py-1 rounded-md text-[10px] font-medium bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50">
+              Rp ${(product.price || 0).toLocaleString('id-ID')}
             </span>
           </td>
-          <td class="py-3 px-4 text-[var(--text-muted)]">👁 ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
+          <td class="py-3 px-4 text-[var(--text-muted)]">
+            🔋 ${batteryHealth} · ${warrantyBadge}
+            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${condition}">${condition}</div>
+          </td>
         </tr>
-      `).join('');
+      `}).join('');
       
       gsap.to('.table-row', {
         opacity: 1,
