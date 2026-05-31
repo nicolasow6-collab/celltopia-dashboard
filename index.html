@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Celltopia // Sales Command Center</title>
+  <title>Celltopia // Inventory Monitor</title>
   
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,7 +11,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <!-- GSAP for smooth animations -->
+  <!-- GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   
   <!-- Google Fonts -->
@@ -43,16 +43,9 @@
       --text-secondary: #a1a1aa;
       --text-muted: #71717a;
       --purple-primary: #a855f7;
-      --purple-secondary: #7c3aed;
       --purple-glow: rgba(168, 85, 247, 0.4);
       --pink-accent: #ec4899;
-      --blue-accent: #3b82f6;
       --emerald-accent: #10b981;
-      --orange-accent: #f97316;
-    }
-    
-    * {
-      box-sizing: border-box;
     }
     
     body {
@@ -61,16 +54,14 @@
       margin: 0;
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
     }
     
-    /* Dotted background pattern */
+    /* Dotted background */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: 
-        radial-gradient(circle at 1px 1px, rgba(168, 85, 247, 0.15) 1px, transparent 0);
+      background-image: radial-gradient(circle at 1px 1px, rgba(168, 85, 247, 0.15) 1px, transparent 0);
       background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
@@ -86,8 +77,7 @@
       height: 200%;
       background: 
         radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
-        radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
       pointer-events: none;
       z-index: 0;
       animation: gradientMove 20s ease-in-out infinite;
@@ -99,7 +89,6 @@
       66% { transform: translate(-1%, 1%) scale(0.98); }
     }
     
-    /* Glass cards */
     .glass {
       background: var(--bg-card);
       backdrop-filter: blur(24px);
@@ -111,396 +100,121 @@
       border-color: var(--border-hover);
     }
     
-    /* Progress bar gradient */
-    .progress-gradient {
-      background: linear-gradient(90deg, var(--purple-primary), var(--pink-accent));
-    }
-    
-    /* Platform badges */
-    .platform-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: var(--bg-dark);
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-hover);
-      border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-muted);
-    }
-    
-    /* Tab styles */
-    .tab-button {
-      padding: 10px 20px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .tab-button:hover {
-      color: var(--text-primary);
-    }
-    
-    .tab-button.active {
-      color: var(--purple-primary);
-      border-bottom-color: var(--purple-primary);
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
   </style>
 </head>
 <body>
-  <!-- Top Bar -->
+  <!-- Header -->
   <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
-    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 bg-[var(--emerald-accent)] rounded-full animate-pulse"></div>
-          <span class="font-bold text-lg text-[var(--text-primary)] tracking-widest">CELLTOPIA</span>
-        </div>
-        <span class="text-xs text-[var(--text-muted)]">// SALES COMMAND CENTER</span>
+    <div class="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-2.5 h-2.5 bg-[var(--emerald-accent)] rounded-full animate-pulse"></div>
+        <span class="font-bold text-lg text-[var(--text-primary)] tracking-widest">CELLTOPIA</span>
+        <span class="text-xs text-[var(--text-muted)]">// INVENTORY MONITOR</span>
       </div>
-      <div class="flex items-center gap-6 text-xs font-mono">
-        <div class="flex items-center gap-2">
-          <span class="text-[var(--text-muted)]">SYSTEM:</span>
-          <span class="text-[var(--emerald-accent)]">● ONLINE</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-[var(--text-muted)]">LAST SYNC:</span>
-          <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
-        </div>
-        <div class="px-3 py-1.5 bg-[var(--purple-primary)]/20 border border-[var(--purple-primary)]/40 rounded-lg">
-          <span class="text-[var(--purple-primary)] font-semibold">AUTOPILOT: ON</span>
-        </div>
+      <div class="flex items-center gap-4 text-xs font-mono">
+        <span class="text-[var(--text-muted)]">LAST SYNC:</span>
+        <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
+        <span class="px-2 py-1 bg-[var(--purple-primary)]/20 border border-[var(--purple-primary)]/40 rounded text-[var(--purple-primary)]">LIVE</span>
       </div>
     </div>
   </header>
 
-  <main class="max-w-[1600px] mx-auto px-6 py-6">
-    <!-- Stats Row -->
-    <div class="grid grid-cols-4 gap-4 mb-6">
+  <main class="max-w-[1400px] mx-auto px-6 py-6">
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
       <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">INVENTORY</div>
-        </div>
+        <div class="text-xs text-[var(--text-muted)] mb-2">TOTAL INVENTORY</div>
         <div class="text-3xl font-bold text-[var(--text-primary)]" id="inventoryCount">0</div>
         <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
       </div>
       <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--blue-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">POSTS TODAY</div>
-        </div>
-        <div class="text-3xl font-bold text-[var(--text-primary)]" id="postsToday">0</div>
-        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
+        <div class="text-xs text-[var(--text-muted)] mb-2">BY WARRANTY</div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="warrantyCount">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="warrantyStatus">iBox: 0 · BC: 0</div>
       </div>
       <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--pink-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">ENGAGEMENT</div>
-        </div>
-        <div class="text-3xl font-bold text-[var(--text-primary)]" id="totalEngagement">0</div>
-        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="engagementBreakdown"> 0 · 🔗 0 · 💬 0</div>
-      </div>
-      <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--emerald-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">SALES</div>
-        </div>
-        <div class="text-3xl font-bold text-[var(--emerald-accent)]" id="conversions">0</div>
-        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="conversionRate">RATE: 0%</div>
+        <div class="text-xs text-[var(--text-muted)] mb-2">PRICE RANGE</div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="priceRange">-</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="avgPrice">Avg: -</div>
       </div>
     </div>
 
-    <!-- Token Usage Matrix -->
-    <div class="glass p-5 mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h3 class="text-sm font-semibold text-[var(--text-primary)]">TOKEN USAGE</h3>
-          <p class="text-xs text-[var(--text-muted)] mt-1">AI agent token consumption (updates when automation runs)</p>
-        </div>
-        <div class="flex items-center gap-2 text-xs font-mono">
-          <span class="text-[var(--text-muted)]">SESSION:</span>
-          <span id="tokenSession" class="text-[var(--purple-primary)]">0</span>
-          <span class="text-[var(--text-muted)]">| DAILY:</span>
-          <span id="tokenDaily" class="text-[var(--pink-accent)]">0</span>
-        </div>
-      </div>
-      <div class="grid grid-cols-4 gap-4">
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-1">Scraping</div>
-          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenScraping">0</div>
-          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
-        </div>
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-1">Content Gen</div>
-          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenContent">0</div>
-          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
-        </div>
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-1">Posting</div>
-          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenPosting">0</div>
-          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
-        </div>
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-1">Total</div>
-          <div class="text-lg font-mono text-[var(--purple-primary)]" id="tokenTotal">0</div>
-          <div class="text-[10px] text-[var(--text-muted)] mt-1">tokens</div>
-        </div>
-      </div>
-      <div class="mt-4 h-2 bg-[var(--bg-dark)] rounded-full overflow-hidden">
-        <div id="tokenProgress" class="h-full progress-gradient rounded-full" style="width: 0%;"></div>
-      </div>
-      <div class="mt-2 flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
-        <span>Daily Limit: 1,000,000 tokens</span>
-        <span id="tokenPercentage">0% used</span>
-      </div>
-      <div class="mt-3 text-[10px] text-[var(--text-muted)] flex items-center gap-2">
-        <span class="w-1.5 h-1.5 bg-[var(--emerald-accent)] rounded-full"></span>
-        <span>Counters update only when scraper/content/posting automation runs (currently idle)</span>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="glass mb-6">
-      <div class="border-b border-[var(--border)] px-6">
-        <div class="flex gap-6">
-          <button class="tab-button active" onclick="switchTab('inventory')">INVENTORY</button>
-          <button class="tab-button" onclick="switchTab('posting')">POSTING LOG</button>
-          <button class="tab-button" onclick="switchTab('analytics')">ANALYTICS</button>
-        </div>
-      </div>
-
-      <!-- Inventory Tab -->
-      <div id="tab-inventory" class="tab-content active p-6">
+    <!-- Chart + Activity -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="glass p-5 col-span-2">
         <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)]">LIVE INVENTORY</h3>
-            <p class="text-xs text-[var(--text-muted)] mt-1">Real-time sync from Supabase (30 min auto-refresh)</p>
-          </div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">INVENTORY BY SERIES</h3>
           <button onclick="refreshData()" class="text-xs text-[var(--purple-primary)] hover:text-[var(--text-primary)] transition flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             REFRESH
           </button>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs font-mono">
-            <thead>
-              <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
-                <th class="text-left py-3 px-4 font-medium">DATE</th>
-                <th class="text-left py-3 px-4 font-medium">MODEL</th>
-                <th class="text-left py-3 px-4 font-medium">IPHONE</th>
-                <th class="text-left py-3 px-4 font-medium">PRICE</th>
-                <th class="text-left py-3 px-4 font-medium">DETAILS</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryTable" class="text-[var(--text-secondary)]">
-              <tr>
-                <td colspan="5" class="py-8 text-center">Loading inventory...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <canvas id="seriesChart" height="180"></canvas>
       </div>
-
-      <!-- Posting Log Tab -->
-      <div id="tab-posting" class="tab-content p-6">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)]">POSTING LOG</h3>
-            <p class="text-xs text-[var(--text-muted)] mt-1">Recent listing activity across platforms</p>
-          </div>
-          <div class="flex items-center gap-2 text-xs">
-            <span class="text-[var(--emerald-accent)]">● LIVE UPDATES</span>
-          </div>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-xs font-mono">
-            <thead>
-              <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
-                <th class="text-left py-3 px-4 font-medium">TIME</th>
-                <th class="text-left py-3 px-4 font-medium">PLATFORM</th>
-                <th class="text-left py-3 px-4 font-medium">IPHONE MODEL</th>
-                <th class="text-left py-3 px-4 font-medium">STATUS</th>
-                <th class="text-left py-3 px-4 font-medium">METRICS</th>
-              </tr>
-            </thead>
-            <tbody id="postsTable" class="text-[var(--text-secondary)]">
-              <tr>
-                <td colspan="5" class="py-8 text-center">
-                  <div class="text-[var(--text-muted)]">No posts yet</div>
-                  <div class="text-[10px] mt-2">Automation will start once accounts are configured</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Analytics Tab -->
-      <div id="tab-analytics" class="tab-content p-6">
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">PLATFORM PERFORMANCE</h3>
-            <canvas id="platformChart" height="200"></canvas>
-            <div class="mt-4 space-y-2" id="platformStats">
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Facebook</span>
-                <span class="text-[var(--text-primary)] font-mono" id="fbCount">0 posts</span>
-              </div>
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Threads</span>
-                <span class="text-[var(--text-primary)] font-mono" id="threadsCount">0 posts</span>
-              </div>
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Carousell</span>
-                <span class="text-[var(--text-primary)] font-mono" id="carousellCount">0 posts</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">ACTIVITY FEED</h3>
-            <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
-              <div class="text-xs text-[var(--text-muted)] font-mono">Waiting for activity...</div>
-            </div>
-          </div>
+      <div class="glass p-5">
+        <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">SYNC STATUS</h3>
+        <div class="space-y-2" id="activityFeed">
+          <div class="text-xs text-[var(--text-muted)] font-mono">Waiting for sync...</div>
         </div>
       </div>
     </div>
 
-    <!-- Task Board -->
+    <!-- Inventory Table -->
     <div class="glass p-5">
-      <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">AUTOMATION QUEUE</h3>
-      <div class="grid grid-cols-3 gap-4">
-        <!-- Pending -->
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
-            <span>PENDING</span>
-            <span class="px-1.5 py-0.5 bg-[var(--bg-card)] rounded font-mono" id="pendingCount">0</span>
-          </div>
-          <div class="space-y-2" id="pendingTasks">
-            <div class="text-xs text-[var(--text-muted)] font-mono">No pending tasks</div>
-          </div>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">LIVE INVENTORY</h3>
+          <p class="text-xs text-[var(--text-muted)] mt-1">Auto-refresh every 30 minutes</p>
         </div>
-        <!-- In Progress -->
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
-            <span>IN PROGRESS</span>
-            <span class="px-1.5 py-0.5 bg-[var(--blue-accent)]/20 text-[var(--blue-accent)] rounded font-mono" id="progressCount">0</span>
-          </div>
-          <div class="space-y-2" id="progressTasks">
-            <div class="text-xs text-[var(--text-muted)] font-mono">No active tasks</div>
-          </div>
-        </div>
-        <!-- Done -->
-        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
-          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
-            <span>DONE</span>
-            <span class="px-1.5 py-0.5 bg-[var(--emerald-accent)]/20 text-[var(--emerald-accent)] rounded font-mono" id="doneCount">0</span>
-          </div>
-          <div class="space-y-2" id="doneTasks">
-            <div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>
-          </div>
-        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs font-mono">
+          <thead>
+            <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
+              <th class="text-left py-3 px-4 font-medium">DATE</th>
+              <th class="text-left py-3 px-4 font-medium">MODEL</th>
+              <th class="text-left py-3 px-4 font-medium">STORAGE</th>
+              <th class="text-left py-3 px-4 font-medium">COLOR</th>
+              <th class="text-left py-3 px-4 font-medium">BATTERY</th>
+              <th class="text-left py-3 px-4 font-medium">WARRANTY</th>
+              <th class="text-left py-3 px-4 font-medium">PRICE</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTable" class="text-[var(--text-secondary)]">
+            <tr><td colspan="7" class="py-8 text-center">Loading...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </main>
 
   <script>
-    // Supabase config - Friend's Celltopia inventory
     const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
-    let platformChart;
-    let isInitialized = false;
-    let inventoryData = [];
-    let tokenUsage = {
-      scraping: 0,
-      content: 0,
-      posting: 0,
-      session: 0,
-      daily: 0
-    };
+    let seriesChart;
 
     document.addEventListener('DOMContentLoaded', () => {
       initChart();
       animateEntrance();
       refreshData();
-      setInterval(refreshData, 1800000); // Auto-refresh every 30 minutes
-      // Token updates removed - only update when actual API calls are made
+      setInterval(refreshData, 1800000); // 30 minutes
     });
 
-    // Tab switching
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      event.target.classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
-
-    // Initialize chart
     function initChart() {
-      const ctx = document.getElementById('platformChart').getContext('2d');
-      platformChart = new Chart(ctx, {
+      const ctx = document.getElementById('seriesChart').getContext('2d');
+      seriesChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Facebook', 'Threads', 'Carousell'],
+          labels: [],
           datasets: [{
-            label: 'Posts',
-            data: [0, 0, 0],
-            backgroundColor: [
-              'rgba(59, 130, 246, 0.5)',
-              'rgba(255, 255, 255, 0.3)',
-              'rgba(246, 110, 12, 0.5)'
-            ],
-            borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
+            label: 'Units',
+            data: [],
+            backgroundColor: 'rgba(168, 85, 247, 0.6)',
+            borderColor: '#a855f7',
             borderWidth: 1,
             borderRadius: 6
           }]
@@ -508,362 +222,109 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { 
-            legend: { display: false }
-          },
+          plugins: { legend: { display: false } },
           scales: {
-            y: { 
-              beginAtZero: true, 
-              grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
-              ticks: { color: 'var(--text-muted)' } 
-            },
-            // Tab switching
-            function switchTab(tabName) {
-              document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-              document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-              event.target.classList.add('active');
-              document.getElementById(`tab-${tabName}`).classList.add('active');
-            }
-
-    // Staggered entrance animation
-    function animateEntrance() {
-      gsap.from('.glass', {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: 'power3.out',
-        delay: 0.2
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } },
+            x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } }
+          }
+        }
       });
     }
 
-    // Refresh data from Supabase
+    function animateEntrance() {
+      gsap.from('.glass', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
+    }
+
     async function refreshData() {
-      gsap.fromTo('#lastSync', 
-        { opacity: 0.5 },
-        { opacity: 1, duration: 0.3 }
-      );
-      
       const syncTime = new Date().toLocaleTimeString('id-ID');
       document.getElementById('lastSync').textContent = syncTime;
-      
+
       try {
-        console.log('Fetching from Supabase:', SUPABASE_URL);
-        
-        // Fetch inventory from Supabase
-        const inventoryResponse = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
-          headers: { 
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-          }
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
-        
-        if (!inventoryResponse.ok) {
-          throw new Error(`HTTP ${inventoryResponse.status}: ${inventoryResponse.statusText}`);
-        }
-        
-        const inventory = await inventoryResponse.json();
-        console.log('Inventory fetched:', inventory.length, 'products');
-        inventoryData = inventory;
-        
-        // Fetch posts (for analytics - will be empty initially)
-        const postsResponse = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=50`, {
-          headers: { 
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        const posts = postsResponse.ok ? await postsResponse.json() : [];
-        
-        updateDashboard(posts, inventory);
-        
-        // Update activity feed with success
-        updateActivityFeed(inventory, syncTime, true);
-        
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const inventory = await response.json();
+        updateDashboard(inventory, syncTime);
+
       } catch (error) {
-        console.error('Fetch error:', error.message);
-        
-        // Show error in activity feed
-        updateActivityFeed([], syncTime, false, error.message);
-        
-        // Still show demo data so UI isn't blank
-        showDemoData();
+        console.error('Fetch error:', error);
+        document.getElementById('activityFeed').innerHTML = `
+          <div class="text-xs text-red-400 font-mono">✗ Sync failed: ${error.message}</div>
+          <div class="text-xs text-[var(--text-muted)] font-mono mt-1">→ Check console (F12)</div>
+        `;
       }
     }
 
-    // Update dashboard with real inventory data
-    function updateDashboard(posts, inventory = []) {
-      // Inventory stats
-      const totalInventory = inventory.length;
+    function updateDashboard(inventory, syncTime) {
+      // Stats
+      const total = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
       const outOfStock = inventory.filter(p => p.stock <= 0).length;
-      
-      // Group by series
+
+      animateValue('inventoryCount', total);
+      document.getElementById('inventoryStatus').innerHTML = `<span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · <span class="text-red-400">OUT: ${outOfStock}</span>`;
+
+      // Warranty
+      const iBox = inventory.filter(p => p.warranty).length;
+      const bc = total - iBox;
+      animateValue('warrantyCount', total);
+      document.getElementById('warrantyStatus').innerHTML = `iBox: ${iBox} · BC: ${bc}`;
+
+      // Price
+      const prices = inventory.map(p => p.price || 0).filter(p => p > 0);
+      if (prices.length > 0) {
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
+        document.getElementById('priceRange').textContent = `Rp ${(min/1e6).toFixed(1)}M - ${(max/1e6).toFixed(1)}M`;
+        document.getElementById('avgPrice').textContent = `Avg: Rp ${(avg/1e6).toFixed(1)}M`;
+      }
+
+      // Chart
       const bySeries = {};
       inventory.forEach(p => {
         const series = p.series || 'Unknown';
         bySeries[series] = (bySeries[series] || 0) + 1;
       });
-      
-      // Posts stats (for automation tracking - will be empty initially)
-      const today = new Date().toDateString();
-      const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
-      const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
-      const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
-      const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      // Update stats with inventory data
-      animateValue('inventoryCount', totalInventory);
-      document.getElementById('inventoryStatus').innerHTML = `
-        <span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · 
-        <span class="text-red-400">OUT: ${outOfStock}</span>
-      `;
-      
-      // Posts stat (show 0 initially since automation not running yet)
-      animateValue('postsToday', todayPosts.length);
-      document.getElementById('postsBreakdown').innerHTML = `
-        <span class="text-[var(--blue-accent)]">FB: ${fbPosts}</span> · 
-        <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · 
-        <span class="text-[var(--orange-accent)]">CR: ${carousellPosts}</span>
-      `;
+      const sortedSeries = Object.entries(bySeries).sort((a, b) => b[1] - a[1]);
+      seriesChart.data.labels = sortedSeries.map(([s]) => `iPhone ${s}`);
+      seriesChart.data.datasets[0].data = sortedSeries.map(([, c]) => c);
+      seriesChart.update('default');
 
-      // Engagement (placeholder until posting starts)
-      const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
-      const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
-      const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
-      
-      animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
-      document.getElementById('engagementBreakdown').textContent = ` ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
-      
-      const conversions = Math.floor(totalMessages * 0.3);
-      animateValue('conversions', conversions);
-      document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
-
-      // Update chart with inventory by series
-      if (isInitialized) {
-        // Show top 3 iPhone series by count
-        const sortedSeries = Object.entries(bySeries)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3);
-        const chartData = sortedSeries.map(([, count]) => count);
-        platformChart.data.labels = sortedSeries.map(([series]) => `iPhone ${series}`);
-        platformChart.data.datasets[0].data = chartData;
-        platformChart.update('default');
-      }
-      
-      // Update platform stats (show inventory distribution instead)
-      document.getElementById('fbCount').textContent = bySeries[13] || 0;
-      document.getElementById('threadsCount').textContent = bySeries[14] || 0;
-      document.getElementById('carousellCount').textContent = bySeries[15] || 0;
-
-      // Update inventory table
-      updateInventoryTable(inventory);
-      
-      // Update posts table (empty for now)
-      updatePostsTable(posts);
-      
-      // Activity Feed
-      updateActivityFeed(inventory, new Date().toLocaleTimeString('id-ID'), true);
-      
-      // Task Board
-      updateTaskBoard();
-    }
-
-    // Animate value counter
-    function animateValue(elementId, target) {
-      const element = document.getElementById(elementId);
-      const current = parseInt(element.textContent.replace(/,/g, '')) || 0;
-      
-      gsap.to({ value: current }, {
-        value: target,
-        duration: 0.8,
-        ease: 'power3.out',
-        onUpdate: function() {
-          element.textContent = Math.round(this.targets()[0].value).toLocaleString();
-        }
-      });
-    }
-
-    // Update inventory table
-    function updateInventoryTable(inventory) {
+      // Table
       const tbody = document.getElementById('inventoryTable');
-      
-      if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No inventory data</td></tr>';
-        return;
-      }
-      
-      // Show latest 10 products
-      tbody.innerHTML = inventory.slice(0, 10).map((product, i) => {
-        const warrantyBadge = product.warranty ? 'iBox' : 'BC';
-        const batteryHealth = product.battery ? `${product.battery}%` : '-';
-        const condition = product.cas || '-';
-        
-        return `
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
-          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
-          <td class="py-3 px-4">
-            <span class="platform-badge bg-purple-900/30 text-[var(--purple-primary)] border border-purple-700/50">
-              iPhone ${product.series || '?'}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">
-            ${product.name || 'Unknown'}
-            <div class="text-[10px] text-[var(--text-muted)] mt-0.5">${product.storage || ''} · ${product.color || ''}</div>
-          </td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-1 rounded-md text-[10px] font-medium bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50">
-              Rp ${(product.price || 0).toLocaleString('id-ID')}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-[var(--text-muted)]">
-            🔋 ${batteryHealth} · ${warrantyBadge}
-            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${condition}">${condition}</div>
-          </td>
-        </tr>
-      `}).join('');
-    }
-
-    // Update posts table
-    function updatePostsTable(posts) {
-      const tbody = document.getElementById('postsTable');
-      
-      if (posts.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="py-8 text-center">
-              <div class="text-[var(--text-muted)]">No posts yet</div>
-              <div class="text-[10px] mt-2">Automation will start once accounts are configured</div>
-            </td>
-          </tr>
-        `;
-        return;
-      }
-      
-      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
-          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-4">
-            <span class="platform-badge ${getPlatformClass(post.platform)}">
-              ${post.platform?.toUpperCase()}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50' : 'bg-red-900/30 text-red-400 border border-red-700/50'}">
-              ${post.status?.toUpperCase()}
-            </span>
-          </td>
-          <td class="py-3 px-4 text-[var(--text-muted)]"> ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
+      tbody.innerHTML = inventory.slice(0, 20).map((p, i) => `
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 30}ms;">
+          <td class="py-3 px-4">${new Date(p.created_at).toLocaleDateString('id-ID')}</td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">iPhone ${p.series || '?'}</td>
+          <td class="py-3 px-4">${p.storage || '-'}</td>
+          <td class="py-3 px-4">${p.color || '-'}</td>
+          <td class="py-3 px-4">${p.battery ? p.battery + '%' : '-'}</td>
+          <td class="py-3 px-4">${p.warranty ? 'iBox' : 'BC'}</td>
+          <td class="py-3 px-4 text-[var(--emerald-accent)]">Rp ${(p.price || 0).toLocaleString('id-ID')}</td>
         </tr>
       `).join('');
-    }
 
-    // Get platform badge class
-    function getPlatformClass(platform) {
-      const classes = {
-        facebook: 'bg-blue-900/30 text-[var(--blue-accent)] border border-blue-700/50',
-        threads: 'bg-zinc-700/30 text-[var(--text-primary)] border border-zinc-600/50',
-        carousell: 'bg-orange-900/30 text-[var(--orange-accent)] border border-orange-700/50'
-      };
-      return classes[platform] || 'bg-zinc-800/30 text-[var(--text-muted)] border border-zinc-700/50';
-    }
-
-    // Update activity feed
-    function updateActivityFeed(inventory = [], syncTime = new Date().toLocaleTimeString('id-ID'), success = true, errorMsg = '') {
-      const feedContainer = document.getElementById('activityFeed');
-      
-      let activities = [];
-      
-      if (success && inventory.length > 0) {
-        activities = [
-          { time: syncTime, action: `✓ Synced ${inventory.length} products from Supabase`, type: 'success' },
-          { time: syncTime, action: '→ Inventory data refreshed', type: 'info' },
-          { time: syncTime, action: '→ Auto-refresh in 30 min', type: 'info' },
-        ];
-      } else if (!success) {
-        activities = [
-          { time: syncTime, action: `✗ Sync failed: ${errorMsg || 'Connection error'}`, type: 'error' },
-          { time: syncTime, action: '→ Showing cached/demo data', type: 'warning' },
-          { time: syncTime, action: '→ Check browser console (F12) for details', type: 'warning' },
-        ];
-      } else {
-        activities = [
-          { time: syncTime, action: '→ Waiting for activity...', type: 'info' },
-        ];
-      }
-      
-      feedContainer.innerHTML = activities.map((a, i) => {
-        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : 
-                          a.type === 'error' ? 'text-red-400' : 
-                          a.type === 'warning' ? 'text-orange-400' : 'text-[var(--text-secondary)]';
-        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
-        
-        return `
-        <div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;">
-          <span class="text-[var(--text-muted)] font-mono">${a.time}</span>
-          <span class="${colorClass}">
-            ${icon} ${a.action}
-          </span>
-        </div>
-      `}).join('');
-    }
-
-    // Update task board
-    function updateTaskBoard() {
-      document.getElementById('pendingCount').textContent = '3';
-      document.getElementById('pendingTasks').innerHTML = `
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Scrape inventory HTML</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Next: 14:00</div>
-        </div>
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Generate content variations</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">iPhone 15 Pro × 5</div>
-        </div>
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Post to 3 platforms</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">FB, Threads, Carousell</div>
-        </div>
+      // Activity feed
+      document.getElementById('activityFeed').innerHTML = `
+        <div class="text-xs text-[var(--emerald-accent)] font-mono">✓ Synced ${total} products</div>
+        <div class="text-xs text-[var(--text-muted)] font-mono mt-1">→ Next: 30 min</div>
       `;
-      
-      document.getElementById('progressCount').textContent = '1';
-      document.getElementById('progressTasks').innerHTML = `
-        <div class="glass p-3 text-xs cursor-pointer border-l-2 border-[var(--purple-primary)]">
-          <div class="text-[var(--text-primary)] font-medium">Posting to Facebook...</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">In progress</div>
-          <div class="mt-2.5 h-1.5 bg-[var(--bg-dark)] rounded-full overflow-hidden">
-            <div class="h-full progress-gradient rounded-full" style="width: 60%;"></div>
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('doneCount').textContent = '9';
-      document.getElementById('doneTasks').innerHTML = `
-        <div class="glass p-3 text-xs opacity-60">
-          <div class="text-[var(--emerald-accent)] line-through">Morning post batch</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Completed: 09:00</div>
-        </div>
-        <div class="glass p-3 text-xs opacity-60">
-          <div class="text-[var(--emerald-accent)] line-through">Afternoon post batch</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Completed: 13:00</div>
-        </div>
-      `;
+
+      gsap.from('#activityFeed > div', { opacity: 0, x: -10, duration: 0.3, stagger: 0.1 });
     }
 
-    // Show demo data (fallback)
-    function showDemoData() {
-      document.getElementById('inventoryCount').textContent = '45';
-      document.getElementById('inventoryStatus').innerHTML = '<span class="text-[var(--emerald-accent)]">IN: 43</span> · <span class="text-red-400">OUT: 2</span>';
-      document.getElementById('postsToday').textContent = '0';
-      document.getElementById('postsBreakdown').innerHTML = 'FB: 0 · TH: 0 · CR: 0';
-      document.getElementById('totalEngagement').textContent = '0';
-      document.getElementById('engagementBreakdown').textContent = '👁 0 · 🔗 0 · 💬 0';
-      document.getElementById('conversions').textContent = '0';
-      document.getElementById('conversionRate').textContent = 'RATE: 0%';
+    function animateValue(id, target) {
+      const el = document.getElementById(id);
+      const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+      gsap.to({ value: current }, {
+        value: target, duration: 0.8, ease: 'power3.out',
+        onUpdate: function() { el.textContent = Math.round(this.targets()[0].value).toLocaleString(); }
+      });
     }
   </script>
 </body>
