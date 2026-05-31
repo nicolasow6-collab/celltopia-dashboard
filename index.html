@@ -261,7 +261,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h3 class="text-sm font-semibold text-[var(--text-primary)]">TOKEN USAGE</h3>
-          <p class="text-xs text-[var(--text-muted)] mt-1">Real-time AI agent token consumption</p>
+          <p class="text-xs text-[var(--text-muted)] mt-1">AI agent token consumption (updates when automation runs)</p>
         </div>
         <div class="flex items-center gap-2 text-xs font-mono">
           <span class="text-[var(--text-muted)]">SESSION:</span>
@@ -298,6 +298,10 @@
       <div class="mt-2 flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
         <span>Daily Limit: 1,000,000 tokens</span>
         <span id="tokenPercentage">0% used</span>
+      </div>
+      <div class="mt-3 text-[10px] text-[var(--text-muted)] flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-[var(--emerald-accent)] rounded-full"></span>
+        <span>Counters update only when scraper/content/posting automation runs (currently idle)</span>
       </div>
     </div>
 
@@ -469,7 +473,7 @@
       animateEntrance();
       refreshData();
       setInterval(refreshData, 1800000); // Auto-refresh every 30 minutes
-      setInterval(updateTokenUsage, 5000); // Simulate token updates every 5s
+      // Token updates removed - only update when actual API calls are made
     });
 
     // Tab switching
@@ -513,37 +517,14 @@
               grid: { color: 'rgba(255, 255, 255, 0.05)' }, 
               ticks: { color: 'var(--text-muted)' } 
             },
-            x: { 
-              grid: { display: false }, 
-              ticks: { color: 'var(--text-muted)' } 
+            // Tab switching
+            function switchTab(tabName) {
+              document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+              document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+              event.target.classList.add('active');
+              document.getElementById(`tab-${tabName}`).classList.add('active');
             }
-          }
-        }
-      });
-    }
-
-    // Simulate token usage updates
-    function updateTokenUsage() {
-      // Simulate small token increases
-      tokenUsage.scraping += Math.floor(Math.random() * 50);
-      tokenUsage.content += Math.floor(Math.random() * 100);
-      tokenUsage.posting += Math.floor(Math.random() * 30);
-      tokenUsage.session = tokenUsage.scraping + tokenUsage.content + tokenUsage.posting;
-      tokenUsage.daily = tokenUsage.session; // For demo, same as session
-
-      // Update UI
-      document.getElementById('tokenScraping').textContent = tokenUsage.scraping.toLocaleString();
-      document.getElementById('tokenContent').textContent = tokenUsage.content.toLocaleString();
-      document.getElementById('tokenPosting').textContent = tokenUsage.posting.toLocaleString();
-      document.getElementById('tokenTotal').textContent = tokenUsage.session.toLocaleString();
-      document.getElementById('tokenSession').textContent = tokenUsage.session.toLocaleString();
-      document.getElementById('tokenDaily').textContent = tokenUsage.daily.toLocaleString();
-
-      // Update progress bar
-      const percentage = (tokenUsage.daily / 1000000) * 100;
-      document.getElementById('tokenProgress').style.width = `${percentage}%`;
-      document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
-    }
 
     // Staggered entrance animation
     function animateEntrance() {
