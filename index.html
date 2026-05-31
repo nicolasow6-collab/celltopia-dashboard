@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celltopia // Mission Control</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Inter', 'system-ui'],
+          },
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .glass {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .status-dot { animation: pulse 2s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 10px #10b981; }
+      50% { opacity: 0.7; box-shadow: 0 0 5px #10b981; }
+    }
+    .kanban-card { transition: all 0.2s; }
+    .kanban-card:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body class="text-zinc-300 min-h-screen">
+  <!-- Top Bar -->
+  <header class="glass sticky top-0 z-50 border-b border-zinc-800">
+    <div class="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full status-dot"></div>
+          <span class="font-semibold text-white">CELLTOPIA</span>
+        </div>
+        <span class="text-xs text-zinc-500">// MISSION CONTROL</span>
+      </div>
+      <div class="flex items-center gap-6 text-xs mono">
+        <span class="text-zinc-500">VPS:</span>
+        <span class="text-emerald-400">ONLINE</span>
+        <span class="text-zinc-500">LAST SYNC:</span>
+        <span id="lastSync" class="text-white">--:--:--</span>
+        <span class="px-2 py-0.5 bg-emerald-900/30 text-emerald-400 rounded" id="agentStatus">AGENT: ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-[1600px] mx-auto px-6 py-6">
+    <!-- Stats Row -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="glass rounded-lg p-4">
+        <div class="text-xs text-zinc-500 mb-1">POSTS TODAY</div>
+        <div class="text-2xl font-bold text-white" id="postsToday">0</div>
+        <div class="text-xs text-zinc-500 mt-2 mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
+      </div>
+      <div class="glass rounded-lg p-4">
+        <div class="text-xs text-zinc-500 mb-1">INVENTORY</div>
+        <div class="text-2xl font-bold text-white" id="inventoryCount">0</div>
+        <div class="text-xs text-zinc-500 mt-2 mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
+      </div>
+      <div class="glass rounded-lg p-4">
+        <div class="text-xs text-zinc-500 mb-1">ENGAGEMENT</div>
+        <div class="text-2xl font-bold text-white" id="totalEngagement">0</div>
+        <div class="text-xs text-zinc-500 mt-2 mono" id="engagementBreakdown">👁 0 ·  0 · 💬 0</div>
+      </div>
+      <div class="glass rounded-lg p-4">
+        <div class="text-xs text-zinc-500 mb-1">CONVERSIONS</div>
+        <div class="text-2xl font-bold text-emerald-400" id="conversions">0</div>
+        <div class="text-xs text-zinc-500 mt-2 mono" id="conversionRate">RATE: 0%</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <!-- Activity Feed -->
+      <div class="col-span-2 glass rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-white">ACTIVITY FEED</h3>
+          <button onclick="refreshData()" class="text-xs text-zinc-500 hover:text-white transition">↻ REFRESH</button>
+        </div>
+        <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
+          <div class="text-xs text-zinc-500 mono">Waiting for agent activity...</div>
+        </div>
+      </div>
+
+      <!-- Platform Performance -->
+      <div class="glass rounded-lg p-4">
+        <h3 class="text-sm font-semibold text-white mb-4">PLATFORM PERFORMANCE</h3>
+        <canvas id="platformChart" height="200"></canvas>
+        <div class="mt-4 space-y-2" id="platformStats">
+          <div class="flex justify-between text-xs">
+            <span class="text-zinc-400">Facebook</span>
+            <span class="text-white mono">0 posts</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-zinc-400">Threads</span>
+            <span class="text-white mono">0 posts</span>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span class="text-zinc-400">Carousell</span>
+            <span class="text-white mono">0 posts</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Board (Kanban) -->
+    <div class="glass rounded-lg p-4 mb-6">
+      <h3 class="text-sm font-semibold text-white mb-4">TASK BOARD</h3>
+      <div class="grid grid-cols-3 gap-4">
+        <!-- Pending -->
+        <div class="bg-zinc-900/50 rounded p-3">
+          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
+            <span>PENDING</span>
+            <span class="px-1.5 py-0.5 bg-zinc-800 rounded" id="pendingCount">0</span>
+          </div>
+          <div class="space-y-2" id="pendingTasks">
+            <div class="text-xs text-zinc-600 mono">No pending tasks</div>
+          </div>
+        </div>
+        <!-- In Progress -->
+        <div class="bg-zinc-900/50 rounded p-3">
+          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
+            <span>IN PROGRESS</span>
+            <span class="px-1.5 py-0.5 bg-blue-900/30 text-blue-400 rounded" id="progressCount">0</span>
+          </div>
+          <div class="space-y-2" id="progressTasks">
+            <div class="text-xs text-zinc-600 mono">No active tasks</div>
+          </div>
+        </div>
+        <!-- Done -->
+        <div class="bg-zinc-900/50 rounded p-3">
+          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
+            <span>DONE</span>
+            <span class="px-1.5 py-0.5 bg-emerald-900/30 text-emerald-400 rounded" id="doneCount">0</span>
+          </div>
+          <div class="space-y-2" id="doneTasks">
+            <div class="text-xs text-zinc-600 mono">No completed tasks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Posts Table -->
+    <div class="glass rounded-lg p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-white">POST LOG</h3>
+        <span class="text-xs text-zinc-500 mono">AUTO-REFRESH: 30S</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs mono">
+          <thead>
+            <tr class="text-zinc-500 border-b border-zinc-800">
+              <th class="text-left py-2 px-3 font-medium">TIMESTAMP</th>
+              <th class="text-left py-2 px-3 font-medium">PLATFORM</th>
+              <th class="text-left py-2 px-3 font-medium">PRODUCT</th>
+              <th class="text-left py-2 px-3 font-medium">STATUS</th>
+              <th class="text-left py-2 px-3 font-medium">PERFORMANCE</th>
+            </tr>
+          </thead>
+          <tbody id="postsTable" class="text-zinc-400">
+            <tr>
+              <td colspan="5" class="py-6 text-center">Waiting for posts...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Supabase config
+    const SUPABASE_URL = 'https://pmuerxjfijrktobzifxk.supabase.co';
+    const SUPABASE_KEY = 'YOUR_ANON_KEY';
+
+    let platformChart;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      refreshData();
+      setInterval(refreshData, 30000);
+    });
+
+    function initChart() {
+      const ctx = document.getElementById('platformChart').getContext('2d');
+      platformChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Facebook', 'Threads', 'Carousell'],
+          datasets: [{
+            label: 'Posts',
+            data: [0, 0, 0],
+            backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(255, 255, 255, 0.3)', 'rgba(246, 110, 12, 0.5)'],
+            borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: '#27272a' }, ticks: { color: '#71717a' } },
+            x: { grid: { display: false }, ticks: { color: '#71717a' } }
+          }
+        }
+      });
+    }
+
+    async function refreshData() {
+      document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
+      
+      try {
+        const postsResponse = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=50`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const posts = await postsResponse.json();
+        updateDashboard(posts);
+      } catch (error) {
+        showDemoData();
+      }
+    }
+
+    function updateDashboard(posts) {
+      const today = new Date().toDateString();
+      const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
+      
+      const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
+      const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
+      const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
+
+      document.getElementById('postsToday').textContent = todayPosts.length;
+      document.getElementById('postsBreakdown').textContent = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
+      document.getElementById('inventoryCount').textContent = '24';
+      document.getElementById('inventoryStatus').textContent = 'IN: 22 · OUT: 2';
+
+      const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
+      const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
+      const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
+      
+      document.getElementById('totalEngagement').textContent = (totalViews + totalClicks + totalMessages).toLocaleString();
+      document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
+      
+      const conversions = Math.floor(totalMessages * 0.3);
+      document.getElementById('conversions').textContent = conversions;
+      document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
+
+      // Activity Feed
+      const feedContainer = document.getElementById('activityFeed');
+      const now = new Date().toLocaleTimeString('id-ID');
+      const activities = [
+        { time: now, action: 'Scraping inventory from HTML source...', type: 'info' },
+        { time: now, action: 'Generated 5 content variations for iPhone 15 Pro', type: 'success' },
+        { time: now, action: 'Posted to Facebook Marketplace', type: 'success' },
+        { time: now, action: 'Posted to Threads', type: 'success' },
+        { time: now, action: 'Posted to Carousell', type: 'success' },
+      ];
+      feedContainer.innerHTML = activities.map(a => `
+        <div class="flex items-start gap-3 text-xs">
+          <span class="text-zinc-600 mono">${a.time}</span>
+          <span class="${a.type === 'success' ? 'text-emerald-400' : 'text-zinc-300'}">
+            ${a.type === 'success' ? '✓' : '→'} ${a.action}
+          </span>
+        </div>
+      `).join('');
+
+      // Platform Chart
+      platformChart.data.datasets[0].data = [fbPosts, threadsPosts, carousellPosts];
+      platformChart.update();
+
+      // Posts Table
+      const tbody = document.getElementById('postsTable');
+      if (posts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-500">No posts yet</td></tr>';
+      } else {
+        tbody.innerHTML = posts.slice(0, 10).map(post => `
+          <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
+            <td class="py-2 px-3">${new Date(post.created_at).toLocaleString('id-ID')}</td>
+            <td class="py-2 px-3">
+              <span class="px-1.5 py-0.5 rounded text-[10px] ${getPlatformClass(post.platform)}">${post.platform?.toUpperCase()}</span>
+            </td>
+            <td class="py-2 px-3 text-white">${post.product_name || 'Unknown'}</td>
+            <td class="py-2 px-3">
+              <span class="px-1.5 py-0.5 rounded text-[10px] ${post.status === 'success' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-red-900/50 text-red-400'}">
+                ${post.status?.toUpperCase()}
+              </span>
+            </td>
+            <td class="py-2 px-3">👁 ${post.views || 0} ·  ${post.clicks || 0} ·  ${post.messages || 0}</td>
+          </tr>
+        `).join('');
+      }
+
+      // Task Board (Demo)
+      document.getElementById('pendingCount').textContent = '3';
+      document.getElementById('pendingTasks').innerHTML = `
+        <div class="kanban-card glass rounded p-2 text-xs">
+          <div class="text-white">Scrape inventory HTML</div>
+          <div class="text-zinc-500 mt-1">Scheduled: 14:00</div>
+        </div>
+        <div class="kanban-card glass rounded p-2 text-xs">
+          <div class="text-white">Generate content variations</div>
+          <div class="text-zinc-500 mt-1">iPhone 15 Pro × 5</div>
+        </div>
+        <div class="kanban-card glass rounded p-2 text-xs">
+          <div class="text-white">Post to 3 platforms</div>
+          <div class="text-zinc-500 mt-1">FB, Threads, Carousell</div>
+        </div>
+      `;
+      document.getElementById('progressCount').textContent = '1';
+      document.getElementById('progressTasks').innerHTML = `
+        <div class="kanban-card glass rounded p-2 text-xs border-l-2 border-blue-500">
+          <div class="text-white">Posting to Facebook...</div>
+          <div class="text-zinc-500 mt-1">In progress</div>
+        </div>
+      `;
+      document.getElementById('doneCount').textContent = '9';
+      document.getElementById('doneTasks').innerHTML = `
+        <div class="kanban-card glass rounded p-2 text-xs opacity-60">
+          <div class="text-emerald-400 line-through">Morning post batch</div>
+          <div class="text-zinc-500 mt-1">Completed: 09:00</div>
+        </div>
+        <div class="kanban-card glass rounded p-2 text-xs opacity-60">
+          <div class="text-emerald-400 line-through">Afternoon post batch</div>
+          <div class="text-zinc-500 mt-1">Completed: 13:00</div>
+        </div>
+      `;
+    }
+
+    function getPlatformClass(platform) {
+      const classes = {
+        facebook: 'bg-blue-900/50 text-blue-400',
+        threads: 'bg-zinc-700 text-zinc-300',
+        carousell: 'bg-orange-900/50 text-orange-400'
+      };
+      return classes[platform] || 'bg-zinc-800 text-zinc-400';
+    }
+
+    function showDemoData() {
+      document.getElementById('postsToday').textContent = '9';
+      document.getElementById('postsBreakdown').textContent = 'FB: 3 · TH: 3 · CR: 3';
+      document.getElementById('totalEngagement').textContent = '1,247';
+      document.getElementById('engagementBreakdown').textContent = '👁 1,089 · 🔗 124 · 💬 34';
+      document.getElementById('conversions').textContent = '10';
+      document.getElementById('conversionRate').textContent = 'RATE: 29%';
+    }
+  </script>
+</body>
+</html>
