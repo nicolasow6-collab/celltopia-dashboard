@@ -610,25 +610,51 @@
         { opacity: 1, duration: 0.3 }
       );
       
-      document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
+      const syncTime = new Date().toLocaleTimeString('id-ID');
+      document.getElementById('lastSync').textContent = syncTime;
       
       try {
+        console.log('Fetching from Supabase:', SUPABASE_URL);
+        
         // Fetch inventory from Supabase
         const inventoryResponse = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          headers: { 
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          }
         });
+        
+        if (!inventoryResponse.ok) {
+          throw new Error(`HTTP ${inventoryResponse.status}: ${inventoryResponse.statusText}`);
+        }
+        
         const inventory = await inventoryResponse.json();
+        console.log('Inventory fetched:', inventory.length, 'products');
         inventoryData = inventory;
         
         // Fetch posts (for analytics - will be empty initially)
         const postsResponse = await fetch(`${SUPABASE_URL}/rest/v1/posts?select=*&order=created_at.desc&limit=50`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          headers: { 
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          }
         });
-        const posts = await postsResponse.json();
+        const posts = postsResponse.ok ? await postsResponse.json() : [];
         
         updateDashboard(posts, inventory);
+        
+        // Update activity feed with success
+        updateActivityFeed(inventory, syncTime, true);
+        
       } catch (error) {
-        console.error('Fetch error:', error);
+        console.error('Fetch error:', error.message);
+        
+        // Show error in activity feed
+        updateActivityFeed([], syncTime, false, error.message);
+        
+        // Still show demo data so UI isn't blank
         showDemoData();
       }
     }
@@ -730,24 +756,43 @@
     }
 
     // Update activity feed with inventory sync status
-    function updateActivityFeed(inventory = []) {
+    function updateActivityFeed(inventory = [], syncTime = new Date().toLocaleTimeString('id-ID'), success = true, errorMsg = '') {
       const feedContainer = document.getElementById('activityFeed');
-      const now = new Date().toLocaleTimeString('id-ID');
       
-      const activities = [
-        { time: now, action: `Synced ${inventory.length} products from Supabase`, type: 'success' },
-        { time: now, action: 'Inventory data refreshed', type: 'info' },
-        { time: now, action: 'Dashboard auto-updated (30 min interval)', type: 'info' },
-      ];
+      let activities = [];
       
-      feedContainer.innerHTML = activities.map((a, i) => `
+      if (success && inventory.length > 0) {
+        activities = [
+          { time: syncTime, action: `✓ Synced ${inventory.length} products from Supabase`, type: 'success' },
+          { time: syncTime, action: '→ Inventory data refreshed', type: 'info' },
+          { time: syncTime, action: '→ Auto-refresh in 30 min', type: 'info' },
+        ];
+      } else if (!success) {
+        activities = [
+          { time: syncTime, action: `✗ Sync failed: ${errorMsg || 'Connection error'}`, type: 'error' },
+          { time: syncTime, action: '→ Showing cached/demo data', type: 'warning' },
+          { time: syncTime, action: '→ Check browser console (F12) for details', type: 'warning' },
+        ];
+      } else {
+        activities = [
+          { time: syncTime, action: '→ Waiting for inventory sync...', type: 'info' },
+        ];
+      }
+      
+      feedContainer.innerHTML = activities.map((a, i) => {
+        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : 
+                          a.type === 'error' ? 'text-red-400' : 
+                          a.type === 'warning' ? 'text-orange-400' : 'text-[var(--text-secondary)]';
+        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
+        
+        return `
         <div class="feed-item flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;">
           <span class="text-[var(--text-muted)] mono">${a.time}</span>
-          <span class="${a.type === 'success' ? 'text-[var(--emerald-accent)]' : 'text-[var(--text-secondary)]'}">
-            ${a.type === 'success' ? '✓' : '→'} ${a.action}
+          <span class="${colorClass}">
+            ${icon} ${a.action}
           </span>
         </div>
-      `).join('');
+      `}).join('');
       
       gsap.to('.feed-item', {
         opacity: 1,
