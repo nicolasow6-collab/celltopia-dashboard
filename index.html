@@ -4,178 +4,452 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Celltopia // Mission Control</title>
+  
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- GSAP for smooth animations -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            mono: ['JetBrains Mono', 'monospace'],
             sans: ['Inter', 'system-ui'],
+            mono: ['JetBrains Mono', 'monospace'],
           },
-        }
+          keyframes: {
+            'pulse-glow': {
+              '0%, 100%': { opacity: 1, boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)' },
+              '50%': { opacity: 0.7, boxShadow: '0 0 10px rgba(16, 185, 129, 0.2)' },
+            },
+            'slide-up': {
+              '0%': { opacity: 0, transform: 'translateY(20px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            },
+            'fade-in': {
+              '0%': { opacity: 0 },
+              '100%': { opacity: 1 },
+            },
+            'scale-in': {
+              '0%': { opacity: 0, transform: 'scale(0.95)' },
+              '100%': { opacity: 1, transform: 'scale(1)' },
+            },
+          },
+          animation: {
+            'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+            'slide-up': 'slide-up 0.5s ease-out forwards',
+            'fade-in': 'fade-in 0.4s ease-out forwards',
+            'scale-in': 'scale-in 0.3s ease-out forwards',
+          },
+        },
+      },
+    };
+  </script>
+  
+  <style>
+    :root {
+      --bg-primary: #050507;
+      --bg-secondary: #0a0a0f;
+      --bg-tertiary: #12121a;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-hover: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.12);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --accent-emerald: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-orange: #f66e0c;
+      --accent-purple: #8b5cf6;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(ellipse at top, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(59, 130, 246, 0.02) 0%, transparent 50%);
+      color: var(--text-secondary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* Glassmorphism - purposeful, not default */
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+    }
+    
+    /* Status indicator with glow */
+    .status-dot {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    .status-dot::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      background: var(--accent-emerald);
+      border-radius: 50%;
+      opacity: 0.3;
+      filter: blur(8px);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    /* Card animations */
+    .card {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    
+    .card-enter {
+      animation: cardEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes cardEnter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
-  </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    body { 
-      font-family: 'Inter', sans-serif;
-      background: #0a0a0f;
+    
+    /* Activity feed item animation */
+    .feed-item {
+      opacity: 0;
+      transform: translateX(-16px);
     }
-    .mono { font-family: 'JetBrains Mono', monospace; }
-    .glass {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    
+    .feed-item-enter {
+      animation: feedItemEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    .status-dot { animation: pulse 2s infinite; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 10px #10b981; }
-      50% { opacity: 0.7; box-shadow: 0 0 5px #10b981; }
+    
+    @keyframes feedItemEnter {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
-    .kanban-card { transition: all 0.2s; }
-    .kanban-card:hover { transform: translateY(-2px); }
+    
+    /* Table row animation */
+    .table-row {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    
+    .table-row-enter {
+      animation: tableRowEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes tableRowEnter {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Kanban card hover effect */
+    .kanban-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .kanban-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Stat number counter animation */
+    .stat-number {
+      display: inline-block;
+    }
+    
+    /* Chart container */
+    .chart-container {
+      position: relative;
+      height: 200px;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-hover);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+    
+    /* Loading shimmer */
+    .shimmer {
+      background: linear-gradient(
+        90deg,
+        var(--surface) 0%,
+        var(--surface-hover) 50%,
+        var(--surface) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Button hover effect */
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-glow::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at center,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 70%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .btn-glow:hover::before {
+      opacity: 1;
+    }
   </style>
 </head>
-<body class="text-zinc-300 min-h-screen">
+<body>
   <!-- Top Bar -->
-  <header class="glass sticky top-0 z-50 border-b border-zinc-800">
-    <div class="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+  <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
+    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full status-dot"></div>
-          <span class="font-semibold text-white">CELLTOPIA</span>
+        <div class="flex items-center gap-3">
+          <div class="status-dot"></div>
+          <div>
+            <span class="font-semibold text-[var(--text-primary)] text-lg tracking-tight">CELLTOPIA</span>
+            <span class="text-[var(--text-muted)] text-xs ml-2">// MISSION CONTROL</span>
+          </div>
         </div>
-        <span class="text-xs text-zinc-500">// MISSION CONTROL</span>
       </div>
-      <div class="flex items-center gap-6 text-xs mono">
-        <span class="text-zinc-500">VPS:</span>
-        <span class="text-emerald-400">ONLINE</span>
-        <span class="text-zinc-500">LAST SYNC:</span>
-        <span id="lastSync" class="text-white">--:--:--</span>
-        <span class="px-2 py-0.5 bg-emerald-900/30 text-emerald-400 rounded" id="agentStatus">AGENT: ACTIVE</span>
+      <div class="flex items-center gap-8 text-xs mono">
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">VPS:</span>
+          <span class="text-[var(--accent-emerald)] font-medium">ONLINE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">LAST SYNC:</span>
+          <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
+        </div>
+        <div class="px-3 py-1.5 bg-emerald-900/20 border border-emerald-900/30 rounded-full">
+          <span class="text-[var(--accent-emerald)] font-medium" id="agentStatus">AGENT: ACTIVE</span>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="max-w-[1600px] mx-auto px-6 py-6">
+  <main class="max-w-[1600px] mx-auto px-6 py-8">
     <!-- Stats Row -->
-    <div class="grid grid-cols-4 gap-4 mb-6">
-      <div class="glass rounded-lg p-4">
-        <div class="text-xs text-zinc-500 mb-1">POSTS TODAY</div>
-        <div class="text-2xl font-bold text-white" id="postsToday">0</div>
-        <div class="text-xs text-zinc-500 mt-2 mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
+    <div class="grid grid-cols-4 gap-4 mb-8" id="statsGrid">
+      <div class="glass rounded-2xl p-5 card" style="animation-delay: 0ms;">
+        <div class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Posts Today</div>
+        <div class="text-4xl font-bold text-[var(--text-primary)] mb-3" id="postsToday">0</div>
+        <div class="text-xs text-[var(--text-muted)] mono" id="postsBreakdown">
+          <span class="text-[var(--accent-blue)]">FB: 0</span> · 
+          <span class="text-[var(--text-primary)]">TH: 0</span> · 
+          <span class="text-[var(--accent-orange)]">CR: 0</span>
+        </div>
       </div>
-      <div class="glass rounded-lg p-4">
-        <div class="text-xs text-zinc-500 mb-1">INVENTORY</div>
-        <div class="text-2xl font-bold text-white" id="inventoryCount">0</div>
-        <div class="text-xs text-zinc-500 mt-2 mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
+      
+      <div class="glass rounded-2xl p-5 card" style="animation-delay: 100ms;">
+        <div class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Inventory</div>
+        <div class="text-4xl font-bold text-[var(--text-primary)] mb-3" id="inventoryCount">0</div>
+        <div class="text-xs text-[var(--text-muted)] mono" id="inventoryStatus">
+          <span class="text-[var(--accent-emerald)]">IN: 0</span> · 
+          <span class="text-red-400">OUT: 0</span>
+        </div>
       </div>
-      <div class="glass rounded-lg p-4">
-        <div class="text-xs text-zinc-500 mb-1">ENGAGEMENT</div>
-        <div class="text-2xl font-bold text-white" id="totalEngagement">0</div>
-        <div class="text-xs text-zinc-500 mt-2 mono" id="engagementBreakdown">👁 0 ·  0 · 💬 0</div>
+      
+      <div class="glass rounded-2xl p-5 card" style="animation-delay: 200ms;">
+        <div class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Engagement</div>
+        <div class="text-4xl font-bold text-[var(--text-primary)] mb-3" id="totalEngagement">0</div>
+        <div class="text-xs text-[var(--text-muted)] mono" id="engagementBreakdown">
+          👁 0 · 🔗 0 · 💬 0
+        </div>
       </div>
-      <div class="glass rounded-lg p-4">
-        <div class="text-xs text-zinc-500 mb-1">CONVERSIONS</div>
-        <div class="text-2xl font-bold text-emerald-400" id="conversions">0</div>
-        <div class="text-xs text-zinc-500 mt-2 mono" id="conversionRate">RATE: 0%</div>
+      
+      <div class="glass rounded-2xl p-5 card" style="animation-delay: 300ms;">
+        <div class="text-xs text-[var(--text-muted)] mb-2 uppercase tracking-wider">Conversions</div>
+        <div class="text-4xl font-bold text-[var(--accent-emerald)] mb-3" id="conversions">0</div>
+        <div class="text-xs text-[var(--text-muted)] mono" id="conversionRate">
+          RATE: 0%
+        </div>
       </div>
     </div>
 
     <!-- Main Grid -->
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-3 gap-4 mb-8">
       <!-- Activity Feed -->
-      <div class="col-span-2 glass rounded-lg p-4">
+      <div class="col-span-2 glass rounded-2xl p-5 card" style="animation-delay: 400ms;">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-white">ACTIVITY FEED</h3>
-          <button onclick="refreshData()" class="text-xs text-zinc-500 hover:text-white transition">↻ REFRESH</button>
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">ACTIVITY FEED</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-0.5">Real-time agent actions</p>
+          </div>
+          <button onclick="refreshData()" class="btn-glow px-3 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition rounded-lg border border-transparent hover:border-[var(--border)]">
+            ↻ Refresh
+          </button>
         </div>
-        <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
-          <div class="text-xs text-zinc-500 mono">Waiting for agent activity...</div>
+        <div class="space-y-2 max-h-72 overflow-y-auto" id="activityFeed">
+          <div class="feed-item text-xs text-[var(--text-muted)] mono py-4 text-center">
+            Waiting for agent activity...
+          </div>
         </div>
       </div>
 
       <!-- Platform Performance -->
-      <div class="glass rounded-lg p-4">
-        <h3 class="text-sm font-semibold text-white mb-4">PLATFORM PERFORMANCE</h3>
-        <canvas id="platformChart" height="200"></canvas>
-        <div class="mt-4 space-y-2" id="platformStats">
-          <div class="flex justify-between text-xs">
-            <span class="text-zinc-400">Facebook</span>
-            <span class="text-white mono">0 posts</span>
+      <div class="glass rounded-2xl p-5 card" style="animation-delay: 500ms;">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">PLATFORM PERFORMANCE</h3>
+          <p class="text-xs text-[var(--text-muted)] mt-0.5">Posts by platform</p>
+        </div>
+        <div class="chart-container mb-4">
+          <canvas id="platformChart"></canvas>
+        </div>
+        <div class="space-y-2" id="platformStats">
+          <div class="flex justify-between items-center text-xs p-2 rounded-lg bg-[var(--bg-tertiary)]">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" style="background: var(--accent-blue);"></div>
+              <span class="text-[var(--text-secondary)]">Facebook</span>
+            </div>
+            <span class="text-[var(--text-primary)] mono font-medium" id="fbCount">0 posts</span>
           </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-zinc-400">Threads</span>
-            <span class="text-white mono">0 posts</span>
+          <div class="flex justify-between items-center text-xs p-2 rounded-lg bg-[var(--bg-tertiary)]">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" style="background: var(--text-primary);"></div>
+              <span class="text-[var(--text-secondary)]">Threads</span>
+            </div>
+            <span class="text-[var(--text-primary)] mono font-medium" id="threadsCount">0 posts</span>
           </div>
-          <div class="flex justify-between text-xs">
-            <span class="text-zinc-400">Carousell</span>
-            <span class="text-white mono">0 posts</span>
+          <div class="flex justify-between items-center text-xs p-2 rounded-lg bg-[var(--bg-tertiary)]">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" style="background: var(--accent-orange);"></div>
+              <span class="text-[var(--text-secondary)]">Carousell</span>
+            </div>
+            <span class="text-[var(--text-primary)] mono font-medium" id="carousellCount">0 posts</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Task Board (Kanban) -->
-    <div class="glass rounded-lg p-4 mb-6">
-      <h3 class="text-sm font-semibold text-white mb-4">TASK BOARD</h3>
+    <div class="glass rounded-2xl p-5 mb-8 card" style="animation-delay: 600ms;">
+      <div class="mb-4">
+        <h3 class="text-sm font-semibold text-[var(--text-primary)]">TASK BOARD</h3>
+        <p class="text-xs text-[var(--text-muted)] mt-0.5">Current workflow status</p>
+      </div>
       <div class="grid grid-cols-3 gap-4">
         <!-- Pending -->
-        <div class="bg-zinc-900/50 rounded p-3">
-          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
-            <span>PENDING</span>
-            <span class="px-1.5 py-0.5 bg-zinc-800 rounded" id="pendingCount">0</span>
+        <div class="bg-[var(--bg-tertiary)] rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">Pending</span>
+            <span class="px-2 py-0.5 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-full text-xs mono" id="pendingCount">0</span>
           </div>
           <div class="space-y-2" id="pendingTasks">
-            <div class="text-xs text-zinc-600 mono">No pending tasks</div>
+            <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No pending tasks</div>
           </div>
         </div>
+        
         <!-- In Progress -->
-        <div class="bg-zinc-900/50 rounded p-3">
-          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
-            <span>IN PROGRESS</span>
-            <span class="px-1.5 py-0.5 bg-blue-900/30 text-blue-400 rounded" id="progressCount">0</span>
+        <div class="bg-[var(--bg-tertiary)] rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">In Progress</span>
+            <span class="px-2 py-0.5 bg-blue-900/20 border border-blue-900/30 rounded-full text-xs mono text-blue-400" id="progressCount">0</span>
           </div>
           <div class="space-y-2" id="progressTasks">
-            <div class="text-xs text-zinc-600 mono">No active tasks</div>
+            <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No active tasks</div>
           </div>
         </div>
+        
         <!-- Done -->
-        <div class="bg-zinc-900/50 rounded p-3">
-          <div class="text-xs text-zinc-500 mb-2 flex items-center justify-between">
-            <span>DONE</span>
-            <span class="px-1.5 py-0.5 bg-emerald-900/30 text-emerald-400 rounded" id="doneCount">0</span>
+        <div class="bg-[var(--bg-tertiary)] rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-[var(--text-muted)] uppercase tracking-wider font-medium">Done</span>
+            <span class="px-2 py-0.5 bg-emerald-900/20 border border-emerald-900/30 rounded-full text-xs mono text-emerald-400" id="doneCount">0</span>
           </div>
           <div class="space-y-2" id="doneTasks">
-            <div class="text-xs text-zinc-600 mono">No completed tasks</div>
+            <div class="text-xs text-[var(--text-muted)] mono py-4 text-center">No completed tasks</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Recent Posts Table -->
-    <div class="glass rounded-lg p-4">
+    <div class="glass rounded-2xl p-5 card" style="animation-delay: 700ms;">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-sm font-semibold text-white">POST LOG</h3>
-        <span class="text-xs text-zinc-500 mono">AUTO-REFRESH: 30S</span>
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">POST LOG</h3>
+          <p class="text-xs text-[var(--text-muted)] mt-0.5">Recent posting activity</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-[var(--text-muted)] mono">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span>AUTO-REFRESH: 30S</span>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-xs mono">
           <thead>
-            <tr class="text-zinc-500 border-b border-zinc-800">
-              <th class="text-left py-2 px-3 font-medium">TIMESTAMP</th>
-              <th class="text-left py-2 px-3 font-medium">PLATFORM</th>
-              <th class="text-left py-2 px-3 font-medium">PRODUCT</th>
-              <th class="text-left py-2 px-3 font-medium">STATUS</th>
-              <th class="text-left py-2 px-3 font-medium">PERFORMANCE</th>
+            <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
+              <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Timestamp</th>
+              <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Platform</th>
+              <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Product</th>
+              <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Status</th>
+              <th class="text-left py-3 px-4 font-medium uppercase tracking-wider">Performance</th>
             </tr>
           </thead>
-          <tbody id="postsTable" class="text-zinc-400">
+          <tbody id="postsTable">
             <tr>
-              <td colspan="5" class="py-6 text-center">Waiting for posts...</td>
+              <td colspan="5" class="py-8 text-center text-[var(--text-muted)]">Waiting for posts...</td>
             </tr>
           </tbody>
         </table>
@@ -189,15 +463,45 @@
     const SUPABASE_KEY = 'YOUR_ANON_KEY';
 
     let platformChart;
+    let isInitialized = false;
 
+    // Initialize with staggered animations
     document.addEventListener('DOMContentLoaded', () => {
       initChart();
+      animateEntrance();
       refreshData();
       setInterval(refreshData, 30000);
     });
 
+    // Staggered entrance animation
+    function animateEntrance() {
+      gsap.to('.card', {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power3.out',
+        delay: 0.2
+      });
+    }
+
+    // Initialize Chart with animation
     function initChart() {
       const ctx = document.getElementById('platformChart').getContext('2d');
+      
+      // Gradient backgrounds
+      const gradientBlue = ctx.createLinearGradient(0, 0, 0, 200);
+      gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+      gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      
+      const gradientWhite = ctx.createLinearGradient(0, 0, 0, 200);
+      gradientWhite.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+      gradientWhite.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      const gradientOrange = ctx.createLinearGradient(0, 0, 0, 200);
+      gradientOrange.addColorStop(0, 'rgba(246, 110, 12, 0.3)');
+      gradientOrange.addColorStop(1, 'rgba(246, 110, 12, 0)');
+      
       platformChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -205,24 +509,58 @@
           datasets: [{
             label: 'Posts',
             data: [0, 0, 0],
-            backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(255, 255, 255, 0.3)', 'rgba(246, 110, 12, 0.5)'],
+            backgroundColor: [gradientBlue, gradientWhite, gradientOrange],
             borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
-            borderWidth: 1
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          animation: {
+            duration: 800,
+            easing: 'easeOutQuart',
+          },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(5, 5, 7, 0.9)',
+              titleColor: '#ffffff',
+              bodyColor: '#a1a1aa',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: true,
+              cornerRadius: 8,
+            }
+          },
           scales: {
-            y: { beginAtZero: true, grid: { color: '#27272a' }, ticks: { color: '#71717a' } },
-            x: { grid: { display: false }, ticks: { color: '#71717a' } }
+            y: { 
+              beginAtZero: true, 
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#71717a', font: { family: 'JetBrains Mono', size: 11 } }
+            },
+            x: { 
+              grid: { display: false },
+              ticks: { color: '#71717a', font: { family: 'JetBrains Mono', size: 11 } }
+            }
           }
         }
       });
+      
+      isInitialized = true;
     }
 
+    // Refresh data with animations
     async function refreshData() {
+      // Animate last sync time
+      gsap.fromTo('#lastSync', 
+        { opacity: 0.5 },
+        { opacity: 1, duration: 0.3 }
+      );
+      
       document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('id-ID');
       
       try {
@@ -232,10 +570,12 @@
         const posts = await postsResponse.json();
         updateDashboard(posts);
       } catch (error) {
+        console.log('Using demo data');
         showDemoData();
       }
     }
 
+    // Update dashboard with animations
     function updateDashboard(posts) {
       const today = new Date().toDateString();
       const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
@@ -244,25 +584,78 @@
       const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
       const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      document.getElementById('postsToday').textContent = todayPosts.length;
-      document.getElementById('postsBreakdown').textContent = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
-      document.getElementById('inventoryCount').textContent = '24';
-      document.getElementById('inventoryStatus').textContent = 'IN: 22 · OUT: 2';
+      // Animate stat numbers
+      animateValue('postsToday', todayPosts.length);
+      document.getElementById('postsBreakdown').innerHTML = `
+        <span class="text-[var(--accent-blue)]">FB: ${fbPosts}</span> · 
+        <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · 
+        <span class="text-[var(--accent-orange)]">CR: ${carousellPosts}</span>
+      `;
+      
+      animateValue('inventoryCount', 24);
+      document.getElementById('inventoryStatus').innerHTML = `
+        <span class="text-[var(--accent-emerald)]">IN: 22</span> · 
+        <span class="text-red-400">OUT: 2</span>
+      `;
 
       const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
       const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
       const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
       
-      document.getElementById('totalEngagement').textContent = (totalViews + totalClicks + totalMessages).toLocaleString();
+      animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
       document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
       
       const conversions = Math.floor(totalMessages * 0.3);
-      document.getElementById('conversions').textContent = conversions;
+      animateValue('conversions', conversions);
       document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
 
-      // Activity Feed
+      // Update chart with animation
+      if (isInitialized) {
+        platformChart.data.datasets[0].data = [fbPosts, threadsPosts, carousellPosts];
+        platformChart.update('default');
+      }
+      
+      // Update platform stats
+      document.getElementById('fbCount').textContent = `${fbPosts} posts`;
+      document.getElementById('threadsCount').textContent = `${threadsPosts} posts`;
+      document.getElementById('carousellCount').textContent = `${carousellPosts} posts`;
+
+      // Activity Feed with staggered animation
+      updateActivityFeed();
+      
+      // Posts Table with staggered animation
+      updatePostsTable(posts);
+      
+      // Task Board
+      updateTaskBoard();
+    }
+
+    // Animate numeric values
+    function animateValue(elementId, value) {
+      const element = document.getElementById(elementId);
+      const current = parseInt(element.textContent.replace(/,/g, '')) || 0;
+      
+      if (current === value) return;
+      
+      gsap.fromTo(element,
+        { textContent: current },
+        {
+          textContent: value,
+          duration: 0.8,
+          ease: 'power3.out',
+          snap: { textContent: 1 },
+          onUpdate: function() {
+            element.textContent = Math.round(this.targets()[0].textContent).toLocaleString();
+          }
+        }
+      );
+    }
+
+    // Update activity feed
+    function updateActivityFeed() {
       const feedContainer = document.getElementById('activityFeed');
       const now = new Date().toLocaleTimeString('id-ID');
+      
       const activities = [
         { time: now, action: 'Scraping inventory from HTML source...', type: 'info' },
         { time: now, action: 'Generated 5 content variations for iPhone 15 Pro', type: 'success' },
@@ -270,93 +663,129 @@
         { time: now, action: 'Posted to Threads', type: 'success' },
         { time: now, action: 'Posted to Carousell', type: 'success' },
       ];
-      feedContainer.innerHTML = activities.map(a => `
-        <div class="flex items-start gap-3 text-xs">
-          <span class="text-zinc-600 mono">${a.time}</span>
-          <span class="${a.type === 'success' ? 'text-emerald-400' : 'text-zinc-300'}">
+      
+      feedContainer.innerHTML = activities.map((a, i) => `
+        <div class="feed-item flex items-start gap-3 text-xs py-2 px-3 rounded-lg hover:bg-[var(--surface-hover)] transition" style="animation-delay: ${i * 80}ms;">
+          <span class="text-[var(--text-muted)] mono">${a.time}</span>
+          <span class="${a.type === 'success' ? 'text-[var(--accent-emerald)]' : 'text-[var(--text-secondary)]'}">
             ${a.type === 'success' ? '✓' : '→'} ${a.action}
           </span>
         </div>
       `).join('');
+      
+      // Animate feed items
+      gsap.to('.feed-item', {
+        opacity: 1,
+        x: 0,
+        duration: 0.4,
+        stagger: 0.08,
+        ease: 'power3.out',
+        delay: 0.1
+      });
+    }
 
-      // Platform Chart
-      platformChart.data.datasets[0].data = [fbPosts, threadsPosts, carousellPosts];
-      platformChart.update();
-
-      // Posts Table
+    // Update posts table
+    function updatePostsTable(posts) {
       const tbody = document.getElementById('postsTable');
+      
       if (posts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-500">No posts yet</td></tr>';
-      } else {
-        tbody.innerHTML = posts.slice(0, 10).map(post => `
-          <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition">
-            <td class="py-2 px-3">${new Date(post.created_at).toLocaleString('id-ID')}</td>
-            <td class="py-2 px-3">
-              <span class="px-1.5 py-0.5 rounded text-[10px] ${getPlatformClass(post.platform)}">${post.platform?.toUpperCase()}</span>
-            </td>
-            <td class="py-2 px-3 text-white">${post.product_name || 'Unknown'}</td>
-            <td class="py-2 px-3">
-              <span class="px-1.5 py-0.5 rounded text-[10px] ${post.status === 'success' ? 'bg-emerald-900/50 text-emerald-400' : 'bg-red-900/50 text-red-400'}">
-                ${post.status?.toUpperCase()}
-              </span>
-            </td>
-            <td class="py-2 px-3">👁 ${post.views || 0} ·  ${post.clicks || 0} ·  ${post.messages || 0}</td>
-          </tr>
-        `).join('');
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No posts yet</td></tr>';
+        return;
       }
+      
+      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
+        <tr class="table-row border-b border-[var(--border)] hover:bg-[var(--surface-hover)] transition" style="animation-delay: ${i * 50}ms;">
+          <td class="py-3 px-4 text-[var(--text-secondary)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-1 rounded-md text-[10px] font-medium ${getPlatformClass(post.platform)}">
+              ${post.platform?.toUpperCase()}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-emerald-400 border border-emerald-900/50' : 'bg-red-900/30 text-red-400 border border-red-900/50'}">
+              ${post.status?.toUpperCase()}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-muted)]">👁 ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
+        </tr>
+      `).join('');
+      
+      // Animate table rows
+      gsap.to('.table-row', {
+        opacity: 1,
+        y: 0,
+        duration: 0.3,
+        stagger: 0.05,
+        ease: 'power3.out',
+        delay: 0.1
+      });
+    }
 
-      // Task Board (Demo)
+    // Update task board
+    function updateTaskBoard() {
+      // Pending tasks
       document.getElementById('pendingCount').textContent = '3';
       document.getElementById('pendingTasks').innerHTML = `
-        <div class="kanban-card glass rounded p-2 text-xs">
-          <div class="text-white">Scrape inventory HTML</div>
-          <div class="text-zinc-500 mt-1">Scheduled: 14:00</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer">
+          <div class="text-[var(--text-primary)] font-medium">Scrape inventory HTML</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">Scheduled: 14:00</div>
         </div>
-        <div class="kanban-card glass rounded p-2 text-xs">
-          <div class="text-white">Generate content variations</div>
-          <div class="text-zinc-500 mt-1">iPhone 15 Pro × 5</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer">
+          <div class="text-[var(--text-primary)] font-medium">Generate content variations</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">iPhone 15 Pro × 5</div>
         </div>
-        <div class="kanban-card glass rounded p-2 text-xs">
-          <div class="text-white">Post to 3 platforms</div>
-          <div class="text-zinc-500 mt-1">FB, Threads, Carousell</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer">
+          <div class="text-[var(--text-primary)] font-medium">Post to 3 platforms</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">FB, Threads, Carousell</div>
         </div>
       `;
+      
+      // In progress tasks
       document.getElementById('progressCount').textContent = '1';
       document.getElementById('progressTasks').innerHTML = `
-        <div class="kanban-card glass rounded p-2 text-xs border-l-2 border-blue-500">
-          <div class="text-white">Posting to Facebook...</div>
-          <div class="text-zinc-500 mt-1">In progress</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer border-l-2 border-[var(--accent-blue)]">
+          <div class="text-[var(--text-primary)] font-medium">Posting to Facebook...</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">In progress</div>
+          <div class="mt-2 h-1 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
+            <div class="h-full bg-[var(--accent-blue)] rounded-full" style="width: 60%;"></div>
+          </div>
         </div>
       `;
+      
+      // Done tasks
       document.getElementById('doneCount').textContent = '9';
       document.getElementById('doneTasks').innerHTML = `
-        <div class="kanban-card glass rounded p-2 text-xs opacity-60">
-          <div class="text-emerald-400 line-through">Morning post batch</div>
-          <div class="text-zinc-500 mt-1">Completed: 09:00</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer opacity-60">
+          <div class="text-[var(--accent-emerald)] line-through">Morning post batch</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">Completed: 09:00</div>
         </div>
-        <div class="kanban-card glass rounded p-2 text-xs opacity-60">
-          <div class="text-emerald-400 line-through">Afternoon post batch</div>
-          <div class="text-zinc-500 mt-1">Completed: 13:00</div>
+        <div class="kanban-card glass rounded-lg p-3 text-xs cursor-pointer opacity-60">
+          <div class="text-[var(--accent-emerald)] line-through">Afternoon post batch</div>
+          <div class="text-[var(--text-muted)] mt-1.5 mono">Completed: 13:00</div>
         </div>
       `;
     }
 
+    // Get platform badge class
     function getPlatformClass(platform) {
       const classes = {
-        facebook: 'bg-blue-900/50 text-blue-400',
-        threads: 'bg-zinc-700 text-zinc-300',
-        carousell: 'bg-orange-900/50 text-orange-400'
+        facebook: 'bg-blue-900/30 text-blue-400 border border-blue-900/50',
+        threads: 'bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border)]',
+        carousell: 'bg-orange-900/30 text-orange-400 border border-orange-900/50'
       };
-      return classes[platform] || 'bg-zinc-800 text-zinc-400';
+      return classes[platform] || 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-[var(--border)]';
     }
 
+    // Demo data
     function showDemoData() {
-      document.getElementById('postsToday').textContent = '9';
-      document.getElementById('postsBreakdown').textContent = 'FB: 3 · TH: 3 · CR: 3';
-      document.getElementById('totalEngagement').textContent = '1,247';
-      document.getElementById('engagementBreakdown').textContent = '👁 1,089 · 🔗 124 · 💬 34';
-      document.getElementById('conversions').textContent = '10';
-      document.getElementById('conversionRate').textContent = 'RATE: 29%';
+      const demoPosts = [
+        { platform: 'facebook', product_name: 'iPhone 15 Pro 256GB', status: 'success', views: 234, clicks: 28, messages: 8, created_at: new Date().toISOString() },
+        { platform: 'threads', product_name: 'iPhone 14 128GB', status: 'success', views: 189, clicks: 22, messages: 6, created_at: new Date().toISOString() },
+        { platform: 'carousell', product_name: 'iPhone 13 Pro 256GB', status: 'success', views: 156, clicks: 18, messages: 5, created_at: new Date().toISOString() },
+      ];
+      
+      updateDashboard(demoPosts);
     }
   </script>
 </body>
