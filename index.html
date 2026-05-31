@@ -5,16 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Celltopia // Sales Command Center</title>
   
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
-  <!-- GSAP -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -50,6 +44,8 @@
       --blue-accent: #3b82f6;
       --emerald-accent: #10b981;
       --orange-accent: #f97316;
+      --alert-bg: rgba(236, 72, 153, 0.1);
+      --alert-border: rgba(236, 72, 153, 0.3);
     }
     
     * { box-sizing: border-box; }
@@ -139,17 +135,8 @@
     }
     
     .tab-content { display: none; }
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
+    .tab-content.active { display: block; }
     
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Terminal Styles */
     .terminal {
       background: var(--bg-terminal);
       border: 1px solid var(--border);
@@ -223,23 +210,160 @@
       font-weight: 600;
     }
     
-    .terminal-command {
-      color: var(--text-secondary);
+    .terminal-command { color: var(--text-secondary); }
+    .terminal-output.success { color: var(--emerald-accent); }
+    .terminal-output.error { color: var(--pink-accent); }
+    .terminal-output.info { color: var(--blue-accent); }
+    
+    /* Alert Banner */
+    .alert-banner {
+      background: var(--alert-bg);
+      border: 1px solid var(--alert-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: none;
     }
     
-    .terminal-output {
-      color: var(--text-muted);
-      padding-left: 140px;
-      margin-top: -4px;
+    .alert-banner.visible {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-bottom: 8px;
     }
     
-    .terminal-output.success { color: var(--emerald-accent); }
-    .terminal-output.error { color: var(--pink-accent); }
+    .alert-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--pink-accent);
+    }
+    
+    .alert-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .alert-list {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+    }
+    
+    .alert-dot {
+      width: 4px;
+      height: 4px;
+      background: var(--pink-accent);
+      border-radius: 50%;
+    }
+    
+    /* Search & Filter */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .search-input:focus {
+      outline: none;
+      border-color: var(--purple-primary);
+    }
+    
+    .filter-select {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--purple-primary);
+    }
+    
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .page-btn {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .page-btn:hover {
+      border-color: var(--purple-primary);
+      color: var(--text-primary);
+    }
+    
+    .page-btn.active {
+      background: var(--purple-primary);
+      border-color: var(--purple-primary);
+      color: white;
+    }
+    
+    .page-info {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .token-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .header-content { flex-direction: column; gap: 12px; }
+      .nav-links { display: none; }
+    }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
     <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -266,17 +390,34 @@
   </header>
 
   <main class="max-w-[1600px] mx-auto px-6 py-6">
-    <!-- Stats Row -->
-    <div class="grid grid-cols-4 gap-4 mb-6">
-      <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">INVENTORY</div>
+    <!-- Alert Banner -->
+    <div id="alertBanner" class="alert-banner">
+      <div class="alert-header">
+        <svg class="alert-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+        <span class="alert-title">INVENTORY ALERTS</span>
+      </div>
+      <div id="alertList" class="alert-list"></div>
+    </div>
+
+    <!-- Stats Row - Visual Hierarchy: Inventory is primary -->
+    <div class="stats-grid grid grid-cols-4 gap-4 mb-6">
+      <div class="glass p-6" style="grid-column: span 2;">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <div class="text-xs text-[var(--text-muted)]">TOTAL INVENTORY</div>
+          </div>
+          <span class="text-[10px] text-[var(--emerald-accent)] px-2 py-1 bg-emerald-900/30 rounded">LIVE</span>
         </div>
-        <div class="text-3xl font-bold text-[var(--text-primary)]" id="inventoryCount">0</div>
-        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
+        <div class="text-5xl font-bold text-[var(--text-primary)] mb-3" id="inventoryCount">0</div>
+        <div class="flex items-center gap-4 text-xs font-mono">
+          <div><span class="text-[var(--emerald-accent)]">IN STOCK:</span> <span id="inStockCount" class="text-[var(--text-primary)]">0</span></div>
+          <div><span class="text-red-400">SOLD:</span> <span id="soldCount" class="text-[var(--text-primary)]">0</span></div>
+        </div>
       </div>
       <div class="glass p-5">
         <div class="flex items-center gap-2 mb-2">
@@ -299,16 +440,6 @@
         <div class="text-3xl font-bold text-[var(--text-primary)]" id="totalEngagement">0</div>
         <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="engagementBreakdown">👁 0 · 🔗 0 · 💬 0</div>
       </div>
-      <div class="glass p-5">
-        <div class="flex items-center gap-2 mb-2">
-          <svg class="w-4 h-4 text-[var(--emerald-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <div class="text-xs text-[var(--text-muted)]">SALES</div>
-        </div>
-        <div class="text-3xl font-bold text-[var(--emerald-accent)]" id="conversions">0</div>
-        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="conversionRate">RATE: 0%</div>
-      </div>
     </div>
 
     <!-- Token Usage Matrix -->
@@ -325,7 +456,7 @@
           <span id="tokenDaily" class="text-[var(--pink-accent)]">0</span>
         </div>
       </div>
-      <div class="grid grid-cols-4 gap-4">
+      <div class="token-grid grid grid-cols-4 gap-4">
         <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
           <div class="text-xs text-[var(--text-muted)] mb-1">API Calls</div>
           <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenScraping">0</div>
@@ -356,16 +487,21 @@
       </div>
     </div>
 
-    <!-- Live Terminal -->
+    <!-- Live Terminal (Collapsible) -->
     <div class="terminal mb-6">
       <div class="terminal-header">
         <div class="terminal-title">Live Terminal Feed</div>
-        <div class="terminal-status">
-          <span class="dot"></span>
-          <span>AUTO-SYNC: 60s</span>
+        <div class="flex items-center gap-4">
+          <div class="terminal-status">
+            <span class="dot"></span>
+            <span>AUTO-SYNC: 60s</span>
+          </div>
+          <button onclick="toggleTerminal()" class="text-[10px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+            <span id="terminalToggleText">COLLAPSE</span>
+          </button>
         </div>
       </div>
-      <div class="terminal-body" id="terminalFeed">
+      <div id="terminalBody" class="terminal-body">
         <div class="terminal-line">
           <span class="terminal-prompt">celltopia@sys:~$</span>
           <span class="terminal-command">Initializing dashboard...</span>
@@ -397,6 +533,30 @@
             REFRESH
           </button>
         </div>
+        
+        <!-- Search & Filter -->
+        <div class="search-bar">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search iPhone model..." onkeyup="filterInventory()">
+          <select id="seriesFilter" class="filter-select" onchange="filterInventory()">
+            <option value="all">All Series</option>
+            <option value="13">iPhone 13</option>
+            <option value="14">iPhone 14</option>
+            <option value="15">iPhone 15</option>
+            <option value="16">iPhone 16</option>
+          </select>
+          <select id="warrantyFilter" class="filter-select" onchange="filterInventory()">
+            <option value="all">All Warranty</option>
+            <option value="ibox">iBox</option>
+            <option value="bc">Bea Cukai</option>
+          </select>
+          <select id="priceFilter" class="filter-select" onchange="filterInventory()">
+            <option value="all">All Prices</option>
+            <option value="low">&lt; Rp 8jt</option>
+            <option value="mid">Rp 8-15jt</option>
+            <option value="high">&gt; Rp 15jt</option>
+          </select>
+        </div>
+        
         <div class="overflow-x-auto">
           <table class="w-full text-xs font-mono">
             <thead>
@@ -413,6 +573,9 @@
             </tbody>
           </table>
         </div>
+        
+        <!-- Pagination -->
+        <div id="pagination" class="pagination"></div>
       </div>
 
       <!-- Posting Log Tab -->
@@ -455,25 +618,19 @@
           <div>
             <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">PLATFORM PERFORMANCE</h3>
             <canvas id="platformChart" height="200"></canvas>
-            <div class="mt-4 space-y-2" id="platformStats">
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Facebook</span>
-                <span class="text-[var(--text-primary)] font-mono" id="fbCount">0 posts</span>
-              </div>
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Threads</span>
-                <span class="text-[var(--text-primary)] font-mono" id="threadsCount">0 posts</span>
-              </div>
-              <div class="flex justify-between text-xs">
-                <span class="text-[var(--text-muted)]">Carousell</span>
-                <span class="text-[var(--text-primary)] font-mono" id="carousellCount">0 posts</span>
-              </div>
-            </div>
           </div>
           <div>
-            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">ACTIVITY FEED</h3>
-            <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
-              <div class="text-xs text-[var(--text-muted)] font-mono">Waiting for activity...</div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">INVENTORY TREND</h3>
+            <canvas id="trendChart" height="200"></canvas>
+            <div class="mt-4 text-xs text-[var(--text-muted)]">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-3 h-3 bg-[var(--purple-primary)] rounded-sm"></span>
+                <span>Current: <span id="trendCurrent" class="text-[var(--text-primary)]">0</span> units</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-[var(--pink-accent)] rounded-sm"></span>
+                <span>Change: <span id="trendChange" class="text-[var(--text-primary)]">0</span> this week</span>
+              </div>
             </div>
           </div>
         </div>
@@ -516,29 +673,33 @@
   </main>
 
   <script>
-    // Supabase config
     const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
-    let platformChart;
-    let isInitialized = false;
+    let platformChart, trendChart;
     let inventoryData = [];
+    let filteredInventory = [];
+    let previousInventory = [];
     let apiCalls = 0;
-    let totalProductsFetched = 0;
     let llmTokens = 0;
+    let totalProductsFetched = 0;
     let postsCreated = 0;
+    let currentPage = 1;
+    const itemsPerPage = 15;
+    let terminalCollapsed = false;
+    let inventoryHistory = [];
 
     document.addEventListener('DOMContentLoaded', () => {
-      initChart();
+      initCharts();
       animateEntrance();
       addTerminalLine('system', 'Dashboard initialized');
       addTerminalLine('system', 'Sync interval: 60 seconds');
+      addTerminalLine('system', 'Alert monitoring: SOLD + NEW STOCK');
       addTerminalLine('system', 'Connecting to Supabase...');
       
       refreshData();
-      setInterval(refreshData, 60000); // 60 seconds
+      setInterval(refreshData, 60000);
       
-      // Real-time token counter update (every second)
       setInterval(() => {
         const totalTokens = apiCalls + llmTokens;
         document.getElementById('tokenSession').textContent = totalTokens.toLocaleString();
@@ -546,43 +707,33 @@
       }, 1000);
     });
 
-    // Add terminal line
-    function addTerminalLine(type, message, output = null) {
-      const feed = document.getElementById('terminalFeed');
-      const now = new Date().toLocaleTimeString('id-ID', { hour12: false });
-      
+    function addTerminalLine(type, message) {
+      const feed = document.getElementById('terminalBody');
       let prompt = 'celltopia@sys:~$';
       let cmdClass = 'terminal-command';
       
-      if (type === 'success') {
-        prompt = '✓';
-        cmdClass = 'success';
-      } else if (type === 'error') {
-        prompt = '✗';
-        cmdClass = 'error';
-      } else if (type === 'system') {
-        prompt = '→';
-        cmdClass = 'terminal-output';
-      }
+      if (type === 'success') { prompt = '✓'; cmdClass = 'terminal-output success'; }
+      else if (type === 'error') { prompt = '✗'; cmdClass = 'terminal-output error'; }
+      else if (type === 'info') { prompt = '→'; cmdClass = 'terminal-output info'; }
+      else if (type === 'system') { prompt = '→'; cmdClass = 'terminal-output'; }
       
       const line = document.createElement('div');
       line.className = 'terminal-line';
-      line.innerHTML = `
-        <span class="terminal-prompt">${prompt}</span>
-        <span class="${cmdClass}">${message}</span>
-      `;
-      
+      line.innerHTML = `<span class="terminal-prompt">${prompt}</span><span class="${cmdClass}">${message}</span>`;
       feed.appendChild(line);
-      
       setTimeout(() => line.classList.add('visible'), 10);
       feed.scrollTop = feed.scrollHeight;
-      
-      if (feed.children.length > 50) {
-        feed.removeChild(feed.children[0]);
-      }
+      if (feed.children.length > 50) feed.removeChild(feed.children[0]);
     }
 
-    // Tab switching
+    function toggleTerminal() {
+      const body = document.getElementById('terminalBody');
+      const text = document.getElementById('terminalToggleText');
+      terminalCollapsed = !terminalCollapsed;
+      body.style.display = terminalCollapsed ? 'none' : 'block';
+      text.textContent = terminalCollapsed ? 'EXPAND' : 'COLLAPSE';
+    }
+
     function switchTab(tabName) {
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -590,10 +741,9 @@
       document.getElementById(`tab-${tabName}`).classList.add('active');
     }
 
-    // Chart
-    function initChart() {
-      const ctx = document.getElementById('platformChart').getContext('2d');
-      platformChart = new Chart(ctx, {
+    function initCharts() {
+      const ctx1 = document.getElementById('platformChart').getContext('2d');
+      platformChart = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels: ['Facebook', 'Threads', 'Carousell'],
@@ -616,15 +766,38 @@
           }
         }
       });
+
+      const ctx2 = document.getElementById('trendChart').getContext('2d');
+      trendChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{
+            label: 'Inventory',
+            data: [0, 0, 0, 0, 0, 0, 0],
+            borderColor: '#a855f7',
+            backgroundColor: 'rgba(168, 85, 247, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } },
+            x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } }
+          }
+        }
+      });
     }
 
-    // Animate entrance
     function animateEntrance() {
       gsap.from('.glass', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
       gsap.from('.terminal', { opacity: 0, y: 20, duration: 0.5, ease: 'power3.out', delay: 0.4 });
     }
 
-    // Refresh data
     async function refreshData() {
       const syncTime = new Date().toLocaleTimeString('id-ID');
       document.getElementById('lastSync').textContent = syncTime;
@@ -632,29 +805,33 @@
       try {
         apiCalls++;
         addTerminalLine('command', `fetch products?sold=eq.false --supabase`);
-        
         const startTime = performance.now();
         
-        const inventoryResponse = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
 
         const duration = Math.round(performance.now() - startTime);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        if (!inventoryResponse.ok) throw new Error(`HTTP ${inventoryResponse.status}`);
-
-        const inventory = await inventoryResponse.json();
+        const inventory = await response.json();
+        previousInventory = [...inventoryData];
         inventoryData = inventory;
+        filteredInventory = inventory;
         totalProductsFetched = inventory.length;
+        currentPage = 1;
 
         addTerminalLine('success', `Synced ${inventory.length} products in ${duration}ms`);
-        addTerminalLine('system', `Data: ${inventory.length} units, updating dashboard...`);
+        
+        // Check for alerts
+        checkInventoryAlerts(previousInventory, inventory);
+        
+        // Update trend history
+        updateTrendHistory(inventory.length);
 
-        // Force update dashboard with fetched data
-        updateDashboard([], inventory);
         updateTokenUsage();
+        updateDashboard([], inventory);
         updateActivityFeed(inventory, syncTime, true);
-
         addTerminalLine('system', `Dashboard updated successfully`);
 
       } catch (error) {
@@ -664,7 +841,60 @@
       }
     }
 
-    // Update token usage
+    function checkInventoryAlerts(previous, current) {
+      const alerts = [];
+      
+      // Check for new stock (products in current but not in previous)
+      const currentIds = new Set(current.map(p => p.id));
+      const previousIds = new Set(previous.map(p => p.id));
+      
+      const newStock = current.filter(p => !previousIds.has(p.id));
+      if (newStock.length > 0) {
+        alerts.push({
+          type: 'new',
+          message: `${newStock.length} new product(s) added`,
+          items: newStock.slice(0, 3).map(p => `${p.name || 'iPhone'} - Rp ${(p.price || 0).toLocaleString('id-ID')}`)
+        });
+      }
+
+      // Show alerts
+      const banner = document.getElementById('alertBanner');
+      const alertList = document.getElementById('alertList');
+      
+      if (alerts.length > 0) {
+        let html = '';
+        alerts.forEach(alert => {
+          html += `<div class="alert-item"><span class="alert-dot"></span><span>${alert.message}</span></div>`;
+          if (alert.items) {
+            alert.items.forEach(item => {
+              html += `<div class="alert-item" style="padding-left: 20px; opacity: 0.8;">→ ${item}</div>`;
+            });
+          }
+        });
+        alertList.innerHTML = html;
+        banner.classList.add('visible');
+        addTerminalLine('info', `Alert: ${alerts.length} inventory change(s) detected`);
+      } else {
+        banner.classList.remove('visible');
+      }
+    }
+
+    function updateTrendHistory(count) {
+      inventoryHistory.push(count);
+      if (inventoryHistory.length > 7) inventoryHistory.shift();
+      
+      trendChart.data.datasets[0].data = inventoryHistory;
+      trendChart.update('default');
+      
+      document.getElementById('trendCurrent').textContent = count;
+      if (inventoryHistory.length > 1) {
+        const change = count - inventoryHistory[0];
+        const changeEl = document.getElementById('trendChange');
+        changeEl.textContent = `${change > 0 ? '+' : ''}${change}`;
+        changeEl.style.color = change >= 0 ? 'var(--emerald-accent)' : 'var(--pink-accent)';
+      }
+    }
+
     function updateTokenUsage() {
       document.getElementById('tokenScraping').textContent = apiCalls.toLocaleString();
       document.getElementById('tokenLLM').textContent = llmTokens.toLocaleString();
@@ -680,22 +910,14 @@
       document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
     }
 
-    // Update dashboard with real inventory data
     function updateDashboard(posts, inventory = []) {
-      console.log('updateDashboard called with inventory:', inventory.length);
-      
-      // Inventory stats
       const totalInventory = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
-      const outOfStock = inventory.filter(p => p.stock <= 0).length;
+      const sold = inventory.filter(p => p.stock <= 0).length;
 
-      console.log('Inventory counts:', { totalInventory, inStock, outOfStock });
-
-      const bySeries = {};
-      inventory.forEach(p => {
-        const series = p.series || 'Unknown';
-        bySeries[series] = (bySeries[series] || 0) + 1;
-      });
+      animateValue('inventoryCount', totalInventory);
+      document.getElementById('inStockCount').textContent = inStock;
+      document.getElementById('soldCount').textContent = sold;
 
       const today = new Date().toDateString();
       const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
@@ -703,13 +925,8 @@
       const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
       const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      // Update inventory stat
-      animateValue('inventoryCount', totalInventory);
-      document.getElementById('inventoryStatus').innerHTML = `<span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · <span class="text-red-400">OUT: ${outOfStock}</span>`;
-      console.log('Inventory stat updated:', totalInventory);
-
       animateValue('postsToday', todayPosts.length);
-      document.getElementById('postsBreakdown').innerHTML = `<span class="text-[var(--blue-accent)]">FB: ${fbPosts}</span> · <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · <span class="text-[var(--orange-accent)]">CR: ${carousellPosts}</span>`;
+      document.getElementById('postsBreakdown').innerHTML = `FB: ${fbPosts} · TH: ${threadsPosts} · CR: ${carousellPosts}`;
 
       const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
       const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
@@ -718,27 +935,10 @@
       animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
       document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
 
-      const conversions = Math.floor(totalMessages * 0.3);
-      animateValue('conversions', conversions);
-      document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
-
-      if (isInitialized) {
-        const sortedSeries = Object.entries(bySeries).sort((a, b) => b[1] - a[1]).slice(0, 3);
-        platformChart.data.labels = sortedSeries.map(([series]) => `iPhone ${series}`);
-        platformChart.data.datasets[0].data = sortedSeries.map(([, count]) => count);
-        platformChart.update('default');
-      }
-
-      document.getElementById('fbCount').textContent = bySeries[13] || 0;
-      document.getElementById('threadsCount').textContent = bySeries[14] || 0;
-      document.getElementById('carousellCount').textContent = bySeries[15] || 0;
-
-      updateInventoryTable(inventory);
-      updatePostsTable(posts);
+      updateInventoryTable(filteredInventory);
       updateTaskBoard();
     }
 
-    // Animate value
     function animateValue(id, target) {
       const el = document.getElementById(id);
       const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
@@ -748,21 +948,47 @@
       });
     }
 
-    // Update inventory table
+    function filterInventory() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const series = document.getElementById('seriesFilter').value;
+      const warranty = document.getElementById('warrantyFilter').value;
+      const price = document.getElementById('priceFilter').value;
+
+      filteredInventory = inventoryData.filter(p => {
+        const matchSearch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.series && p.series.includes(search));
+        const matchSeries = series === 'all' || (p.series && p.series === series);
+        const matchWarranty = warranty === 'all' || (warranty === 'ibox' && p.warranty) || (warranty === 'bc' && !p.warranty);
+        const matchPrice = price === 'all' || 
+          (price === 'low' && p.price < 8000000) ||
+          (price === 'mid' && p.price >= 8000000 && p.price <= 15000000) ||
+          (price === 'high' && p.price > 15000000);
+        
+        return matchSearch && matchSeries && matchWarranty && matchPrice;
+      });
+
+      currentPage = 1;
+      updateInventoryTable(filteredInventory);
+    }
+
     function updateInventoryTable(inventory) {
       const tbody = document.getElementById('inventoryTable');
       if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No inventory data</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No products match your filters</td></tr>';
+        updatePagination(0);
         return;
       }
 
-      tbody.innerHTML = inventory.slice(0, 10).map((product, i) => {
+      const totalPages = Math.ceil(inventory.length / itemsPerPage);
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageData = inventory.slice(start, end);
+
+      tbody.innerHTML = pageData.map((product, i) => {
         const warrantyBadge = product.warranty ? 'iBox' : 'BC';
         const batteryHealth = product.battery ? `${product.battery}%` : '-';
-        const condition = product.cas || '-';
-
+        
         return `
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition">
           <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
           <td class="py-3 px-4">
             <span class="platform-badge bg-purple-900/30 text-[var(--purple-primary)] border border-purple-700/50">iPhone ${product.series || '?'}</span>
@@ -776,79 +1002,54 @@
           </td>
           <td class="py-3 px-4 text-[var(--text-muted)]">
             🔋 ${batteryHealth} · ${warrantyBadge}
-            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${condition}">${condition}</div>
+            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${product.cas || ''}">${product.cas || '-'}</div>
           </td>
         </tr>
       `}).join('');
+
+      updatePagination(totalPages);
     }
 
-    // Update posts table
-    function updatePostsTable(posts) {
-      const tbody = document.getElementById('postsTable');
-      if (posts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center"><div class="text-[var(--text-muted)]">No posts yet</div><div class="text-[10px] mt-2">Automation will start once accounts are configured</div></td></tr>';
+    function updatePagination(totalPages) {
+      const pagination = document.getElementById('pagination');
+      if (totalPages <= 1) {
+        pagination.innerHTML = '';
         return;
       }
-      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
-        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
-          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-4"><span class="platform-badge ${getPlatformClass(post.platform)}">${post.platform?.toUpperCase()}</span></td>
-          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
-          <td class="py-3 px-4"><span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50' : 'bg-red-900/30 text-red-400 border border-red-700/50'}">${post.status?.toUpperCase()}</span></td>
-          <td class="py-3 px-4 text-[var(--text-muted)]">👁 ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
-        </tr>
-      `).join('');
+
+      let html = `
+        <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+        <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+        <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>
+      `;
+      pagination.innerHTML = html;
     }
 
-    function getPlatformClass(platform) {
-      const classes = {
-        facebook: 'bg-blue-900/30 text-[var(--blue-accent)] border border-blue-700/50',
-        threads: 'bg-zinc-700/30 text-[var(--text-primary)] border border-zinc-600/50',
-        carousell: 'bg-orange-900/30 text-[var(--orange-accent)] border border-orange-700/50'
-      };
-      return classes[platform] || 'bg-zinc-800/30 text-[var(--text-muted)] border border-zinc-700/50';
+    function changePage(page) {
+      const totalPages = Math.ceil(filteredInventory.length / itemsPerPage);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      updateInventoryTable(filteredInventory);
     }
 
-    // Update activity feed
-    function updateActivityFeed(inventory = [], syncTime, success = true, errorMsg = '') {
-      const feedContainer = document.getElementById('activityFeed');
-      let activities = [];
-
+    function updateActivityFeed(inventory, syncTime, success, errorMsg = '') {
+      const feed = document.getElementById('activityFeed');
       if (success && inventory.length > 0) {
-        activities = [
-          { time: syncTime, action: `✓ Synced ${inventory.length} products`, type: 'success' },
-          { time: syncTime, action: '→ Inventory refreshed', type: 'info' },
-          { time: syncTime, action: '→ Next: 60s', type: 'info' },
-        ];
-      } else if (!success) {
-        activities = [
-          { time: syncTime, action: `✗ Sync failed: ${errorMsg}`, type: 'error' },
-          { time: syncTime, action: '→ Check console (F12)', type: 'warning' },
-        ];
+        feed.innerHTML = `
+          <div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition">
+            <span class="text-[var(--text-muted)] font-mono">${syncTime}</span>
+            <span class="text-[var(--emerald-accent)]">✓ Synced ${inventory.length} products</span>
+          </div>
+        `;
       }
-
-      feedContainer.innerHTML = activities.map((a, i) => {
-        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : a.type === 'error' ? 'text-red-400' : 'text-orange-400';
-        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
-        return `<div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;"><span class="text-[var(--text-muted)] font-mono">${a.time}</span><span class="${colorClass}">${icon} ${a.action}</span></div>`;
-      }).join('');
     }
 
-    // Task board
     function updateTaskBoard() {
       document.getElementById('pendingCount').textContent = '3';
       document.getElementById('pendingTasks').innerHTML = `
         <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
           <div class="text-[var(--text-primary)] font-medium">Scrape inventory</div>
           <div class="text-[var(--text-muted)] mt-1.5 font-mono">Next: 60s</div>
-        </div>
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Generate variations</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">iPhone 15 Pro × 5</div>
-        </div>
-        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
-          <div class="text-[var(--text-primary)] font-medium">Post to platforms</div>
-          <div class="text-[var(--text-muted)] mt-1.5 font-mono">FB, Threads, Carousell</div>
         </div>
       `;
       document.getElementById('progressCount').textContent = '1';
