@@ -3,123 +3,189 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CELLTOPIA — Inventory Dashboard</title>
+  <title>Celltopia // Sales Command Center</title>
   
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- GSAP -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
   
   <style>
     :root {
-      --bg-dark: #0a0a0a;
-      --bg-card: #0f0f0f;
-      --bg-terminal: #0d0d0d;
-      --border: #1a1a1a;
-      --border-light: #2a2a2a;
-      --text-primary: #e8e0d5;
-      --text-secondary: #8b8575;
-      --text-muted: #5a5545;
-      --accent: #c9b896;
-      --accent-dim: #8b7f65;
-      --success: #6b8e6b;
-      --error: #a86b6b;
-      --purple: #a855f7;
+      --bg-dark: #030014;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-terminal: rgba(0, 0, 0, 0.3);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --purple-primary: #a855f7;
+      --purple-secondary: #7c3aed;
+      --purple-glow: rgba(168, 85, 247, 0.4);
+      --pink-accent: #ec4899;
+      --blue-accent: #3b82f6;
+      --emerald-accent: #10b981;
+      --orange-accent: #f97316;
     }
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; }
     
     body {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Inter', sans-serif;
       background: var(--bg-dark);
-      color: var(--text-primary);
-      line-height: 1.6;
+      margin: 0;
+      min-height: 100vh;
       overflow-x: hidden;
-      font-size: 14px;
+      position: relative;
     }
     
     body::before {
       content: '';
       position: fixed;
       inset: 0;
-      background-image: 
-        linear-gradient(rgba(26, 26, 26, 0.4) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(26, 26, 26, 0.4) 1px, transparent 1px);
-      background-size: 60px 60px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(168, 85, 247, 0.15) 1px, transparent 0);
+      background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
     }
     
-    .container {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 0 3rem;
-      position: relative;
-      z-index: 1;
+    body::after {
+      content: '';
+      position: fixed;
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: 
+        radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+      animation: gradientMove 20s ease-in-out infinite;
     }
     
-    header {
-      border-bottom: 1px solid var(--border);
-      padding: 2rem 0;
-      background: var(--bg-dark);
+    @keyframes gradientMove {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(2%, 2%) scale(1.05); }
+      66% { transform: translate(-1%, 1%) scale(0.98); }
     }
     
-    .header-content {
+    .glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .glass:hover { border-color: var(--border-hover); }
+    
+    .progress-gradient {
+      background: linear-gradient(90deg, var(--purple-primary), var(--pink-accent));
+    }
+    
+    .platform-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+    
+    .tab-button {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-button:hover { color: var(--text-primary); }
+    .tab-button.active {
+      color: var(--purple-primary);
+      border-bottom-color: var(--purple-primary);
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Terminal Styles */
+    .terminal {
+      background: var(--bg-terminal);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .terminal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
     }
     
-    .logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      color: var(--text-primary);
-      text-transform: uppercase;
-    }
-    
-    .logo span { color: var(--accent); }
-    
-    .nav-links {
-      display: flex;
-      gap: 2.5rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-    
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    
-    .nav-links a:hover { color: var(--accent); }
-    
-    .status-bar {
-      display: flex;
-      gap: 2rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
+    .terminal-title {
+      font-size: 11px;
+      letter-spacing: 0.1em;
       color: var(--text-muted);
       text-transform: uppercase;
     }
     
-    .status-item {
+    .terminal-status {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--emerald-accent);
     }
     
-    .status-dot {
+    .terminal-status .dot {
       width: 6px;
       height: 6px;
-      background: var(--success);
+      background: var(--emerald-accent);
       border-radius: 50%;
-      animation: pulse 2s infinite;
+      animation: pulse 1.5s infinite;
     }
     
     @keyframes pulse {
@@ -127,210 +193,18 @@
       50% { opacity: 0.5; transform: scale(0.9); }
     }
     
-    main { padding: 4rem 0; }
-    
-    .hero {
-      text-align: center;
-      padding: 4rem 0 5rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 4rem;
-    }
-    
-    .hero-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.25em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 1.25rem;
-    }
-    
-    .hero-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.75rem;
-      font-weight: 400;
-      letter-spacing: 0.03em;
-      color: var(--text-primary);
-      margin-bottom: 1.25rem;
-      font-style: italic;
-    }
-    
-    .hero-title em { color: var(--accent); }
-    
-    .hero-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      max-width: 580px;
-      margin: 0 auto;
-      line-height: 1.9;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      margin-bottom: 3rem;
-    }
-    
-    .stat-card {
-      background: var(--bg-card);
-      padding: 2.25rem;
-    }
-    
-    .stat-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 0.875rem;
-    }
-    
-    .stat-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.25rem;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 0.625rem;
-    }
-    
-    .stat-meta {
-      font-size: 0.65rem;
-      color: var(--text-secondary);
-      letter-spacing: 0.03em;
-    }
-    
-    .section {
-      border: 1px solid var(--border);
-      margin-bottom: 1px;
-    }
-    
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    
-    .section-title {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-    }
-    
-    .section-content {
-      padding: 0;
-    }
-    
-    .token-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-    }
-    
-    .token-card {
-      background: var(--bg-card);
-      padding: 1.75rem;
-    }
-    
-    .token-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 0.625rem;
-    }
-    
-    .token-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.75rem;
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-    
-    .token-sub {
-      font-size: 0.6rem;
-      color: var(--text-secondary);
-      margin-top: 0.375rem;
-      letter-spacing: 0.02em;
-    }
-    
-    .token-bar {
-      height: 1px;
-      background: var(--border-light);
-      margin: 1.75rem 0 0.875rem;
-    }
-    
-    .token-progress {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    
-    .token-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-    }
-    
-    .terminal {
-      background: var(--bg-terminal);
-      border: 1px solid var(--border);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      line-height: 1.8;
-    }
-    
-    .terminal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.875rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    
-    .terminal-title {
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-    }
-    
-    .terminal-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.6rem;
-      color: var(--success);
-    }
-    
-    .terminal-status .dot {
-      width: 5px;
-      height: 5px;
-      background: var(--success);
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-    
     .terminal-body {
-      padding: 1.25rem;
-      max-height: 280px;
+      padding: 16px;
+      max-height: 240px;
       overflow-y: auto;
-      font-size: 0.68rem;
+      font-size: 11px;
+      line-height: 1.8;
     }
     
     .terminal-line {
       display: flex;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
+      gap: 8px;
+      margin-bottom: 4px;
       opacity: 0;
       transform: translateY(8px);
     }
@@ -344,8 +218,9 @@
     }
     
     .terminal-prompt {
-      color: var(--accent);
+      color: var(--purple-primary);
       white-space: nowrap;
+      font-weight: 600;
     }
     
     .terminal-command {
@@ -354,364 +229,324 @@
     
     .terminal-output {
       color: var(--text-muted);
-      padding-left: 3.5rem;
-      margin-top: -0.3rem;
-      margin-bottom: 0.75rem;
+      padding-left: 140px;
+      margin-top: -4px;
+      margin-bottom: 8px;
     }
     
-    .terminal-output.success { color: var(--success); }
-    .terminal-output.error { color: var(--error); }
-    
-    .tabs {
-      display: flex;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    
-    .tab-btn {
-      padding: 1rem 1.75rem;
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid transparent;
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .tab-btn:hover { color: var(--text-primary); }
-    
-    .tab-btn.active {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-    
-    .tab-content {
-      display: none;
-      border: 1px solid var(--border);
-      border-top: none;
-      padding: 0;
-    }
-    
-    .tab-content.active { display: block; }
-    
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-    }
-    
-    .table-title {
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-    }
-    
-    .refresh-btn {
-      background: transparent;
-      border: 1px solid var(--border-light);
-      color: var(--text-secondary);
-      padding: 0.5rem 1.25rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.6rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .refresh-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.72rem;
-    }
-    
-    thead {
-      border-bottom: 1px solid var(--border);
-    }
-    
-    th {
-      text-align: left;
-      padding: 1rem 1rem;
-      font-weight: 400;
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.6rem;
-    }
-    
-    tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.2s;
-    }
-    
-    tbody tr:hover {
-      background: rgba(201, 184, 150, 0.04);
-    }
-    
-    td {
-      padding: 1rem;
-      color: var(--text-secondary);
-    }
-    
-    .model-badge {
-      display: inline-block;
-      padding: 0.25rem 0.625rem;
-      border: 1px solid var(--border-light);
-      font-size: 0.6rem;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-    }
-    
-    .price-tag {
-      color: var(--success);
-    }
-    
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem 0;
-      margin-top: 5rem;
-      font-size: 0.6rem;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-    }
-    
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg-dark); }
-    ::-webkit-scrollbar-thumb { background: var(--border-light); }
+    .terminal-output.success { color: var(--emerald-accent); }
+    .terminal-output.error { color: var(--pink-accent); }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container header-content">
-      <div class="logo">Celltopia<span>.</span></div>
-      <nav class="nav-links">
-        <a href="#">Dashboard</a>
-        <a href="#">Inventory</a>
-        <a href="#">Automation</a>
-        <a href="#">Settings</a>
-      </nav>
-      <div class="status-bar">
-        <div class="status-item">
-          <span class="status-dot"></span>
-          <span>System Online</span>
+  <!-- Header -->
+  <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
+    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 bg-[var(--emerald-accent)] rounded-full animate-pulse"></div>
+          <span class="font-bold text-lg text-[var(--text-primary)] tracking-widest">CELLTOPIA</span>
         </div>
-        <div class="status-item">
-          <span>Sync:</span>
-          <span id="lastSync" style="color: var(--text-secondary);">--:--:--</span>
+        <span class="text-xs text-[var(--text-muted)]">// SALES COMMAND CENTER</span>
+      </div>
+      <div class="flex items-center gap-6 text-xs font-mono">
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">SYSTEM:</span>
+          <span class="text-[var(--emerald-accent)]">● ONLINE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[var(--text-muted)]">LAST SYNC:</span>
+          <span id="lastSync" class="text-[var(--text-primary)]">--:--:--</span>
+        </div>
+        <div class="px-3 py-1.5 bg-[var(--purple-primary)]/20 border border-[var(--purple-primary)]/40 rounded-lg">
+          <span class="text-[var(--purple-primary)] font-semibold">AUTOPILOT: ON</span>
         </div>
       </div>
     </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div class="hero-label">Inventory Monitoring System</div>
-      <h1 class="hero-title">Sales Command Center</h1>
-      <p class="hero-subtitle">
-        Real-time inventory synchronization from Supabase. 
-        Automated tracking across all product lines with live terminal output.
-      </p>
-    </section>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Inventory</div>
-        <div class="stat-value" id="inventoryCount">0</div>
-        <div class="stat-meta" id="inventoryStatus">IN: 0 · OUT: 0</div>
+  <main class="max-w-[1600px] mx-auto px-6 py-6">
+    <!-- Stats Row -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--purple-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">INVENTORY</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="inventoryCount">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="inventoryStatus">IN: 0 · OUT: 0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Warranty Distribution</div>
-        <div class="stat-value" id="warrantyCount">0</div>
-        <div class="stat-meta" id="warrantyStatus">iBox: 0 · BC: 0</div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--blue-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">POSTS TODAY</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="postsToday">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Price Range</div>
-        <div class="stat-value" id="priceRange">—</div>
-        <div class="stat-meta" id="avgPrice">Avg: —</div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--pink-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">ENGAGEMENT</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--text-primary)]" id="totalEngagement">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="engagementBreakdown">👁 0 · 🔗 0 · 💬 0</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Posts Today</div>
-        <div class="stat-value" id="postsToday">0</div>
-        <div class="stat-meta" id="postsBreakdown">FB: 0 · TH: 0 · CR: 0</div>
+      <div class="glass p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-[var(--emerald-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="text-xs text-[var(--text-muted)]">SALES</div>
+        </div>
+        <div class="text-3xl font-bold text-[var(--emerald-accent)]" id="conversions">0</div>
+        <div class="text-xs text-[var(--text-muted)] mt-2 font-mono" id="conversionRate">RATE: 0%</div>
       </div>
     </div>
 
-    <section class="section">
-      <div class="section-header">
-        <div class="section-title">Token Usage — Real-time</div>
-        <div style="font-size: 0.6rem; color: var(--text-muted);">
-          Session: <span id="tokenSession" style="color: var(--accent);">0</span>
+    <!-- Token Usage Matrix -->
+    <div class="glass p-5 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-semibold text-[var(--text-primary)]">TOKEN USAGE</h3>
+          <p class="text-xs text-[var(--text-muted)] mt-1">Real-time LLM token consumption tracking</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-mono">
+          <span class="text-[var(--text-muted)]">SESSION:</span>
+          <span id="tokenSession" class="text-[var(--purple-primary)]">0</span>
+          <span class="text-[var(--text-muted)]">| DAILY:</span>
+          <span id="tokenDaily" class="text-[var(--pink-accent)]">0</span>
         </div>
       </div>
-      <div class="section-content">
-        <div class="token-grid">
-          <div class="token-card">
-            <div class="token-label">API Calls</div>
-            <div class="token-value" id="tokenScraping">0</div>
-            <div class="token-sub">Supabase requests</div>
-          </div>
-          <div class="token-card">
-            <div class="token-label">LLM Tokens</div>
-            <div class="token-value" id="tokenLLM">0</div>
-            <div class="token-sub">AI generation</div>
-          </div>
-          <div class="token-card">
-            <div class="token-label">Products</div>
-            <div class="token-value" id="tokenContent">0</div>
-            <div class="token-sub">Units fetched</div>
-          </div>
-          <div class="token-card">
-            <div class="token-label">Posts</div>
-            <div class="token-value" id="tokenPosting">0</div>
-            <div class="token-sub">Listings created</div>
-          </div>
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">API Calls</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenScraping">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">Supabase requests</div>
         </div>
-        <div class="section-content" style="padding: 0 1.75rem;">
-          <div class="token-bar">
-            <div class="token-progress" id="tokenProgress"></div>
-          </div>
-          <div class="token-meta" style="padding-bottom: 1.5rem;">
-            <span>Daily Limit: 1,000 API calls</span>
-            <span id="tokenPercentage">0% used</span>
-          </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">LLM Tokens</div>
+          <div class="text-lg font-mono text-[var(--purple-primary)]" id="tokenLLM">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">AI generation</div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Products</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenContent">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">Units fetched</div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-1">Posts</div>
+          <div class="text-lg font-mono text-[var(--text-primary)]" id="tokenPosting">0</div>
+          <div class="text-[10px] text-[var(--text-muted)] mt-1">Listings created</div>
         </div>
       </div>
-    </section>
+      <div class="mt-4 h-2 bg-[var(--bg-dark)] rounded-full overflow-hidden">
+        <div id="tokenProgress" class="h-full progress-gradient rounded-full" style="width: 0%;"></div>
+      </div>
+      <div class="mt-2 flex justify-between text-[10px] text-[var(--text-muted)] font-mono">
+        <span>Daily Limit: 1,000 API calls</span>
+        <span id="tokenPercentage">0% used</span>
+      </div>
+    </div>
 
-    <section class="section terminal" style="margin-bottom: 1px;">
+    <!-- Live Terminal -->
+    <div class="terminal mb-6">
       <div class="terminal-header">
-        <div class="terminal-title">Live Terminal</div>
+        <div class="terminal-title">Live Terminal Feed</div>
         <div class="terminal-status">
           <span class="dot"></span>
-          <span>Auto-refresh: 60s</span>
+          <span>AUTO-SYNC: 60s</span>
         </div>
       </div>
       <div class="terminal-body" id="terminalFeed">
         <div class="terminal-line">
           <span class="terminal-prompt">celltopia@sys:~$</span>
-          <span class="terminal-command">Initializing inventory monitor...</span>
+          <span class="terminal-command">Initializing dashboard...</span>
         </div>
       </div>
-    </section>
-
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('inventory')">Inventory</button>
-      <button class="tab-btn" onclick="switchTab('posting')">Posting Log</button>
-      <button class="tab-btn" onclick="switchTab('activity')">Activity</button>
     </div>
 
-    <div id="tab-inventory" class="tab-content active">
-      <div class="table-header">
-        <div class="table-title">Live Product Feed</div>
-        <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
+    <!-- Tabs -->
+    <div class="glass mb-6">
+      <div class="border-b border-[var(--border)] px-6">
+        <div class="flex gap-6">
+          <button class="tab-button active" onclick="switchTab('inventory')">INVENTORY</button>
+          <button class="tab-button" onclick="switchTab('posting')">POSTING LOG</button>
+          <button class="tab-button" onclick="switchTab('analytics')">ANALYTICS</button>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Model</th>
-            <th>Storage</th>
-            <th>Color</th>
-            <th>Battery</th>
-            <th>Warranty</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody id="inventoryTable">
-          <tr><td colspan="7" style="text-align: center; padding: 3rem;">Loading inventory...</td></tr>
-        </tbody>
-      </table>
+
+      <!-- Inventory Tab -->
+      <div id="tab-inventory" class="tab-content active p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">LIVE INVENTORY</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Real-time sync from Supabase (60s auto-refresh)</p>
+          </div>
+          <button onclick="refreshData()" class="text-xs text-[var(--purple-primary)] hover:text-[var(--text-primary)] transition flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            REFRESH
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs font-mono">
+            <thead>
+              <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th class="text-left py-3 px-4 font-medium">DATE</th>
+                <th class="text-left py-3 px-4 font-medium">MODEL</th>
+                <th class="text-left py-3 px-4 font-medium">IPHONE</th>
+                <th class="text-left py-3 px-4 font-medium">PRICE</th>
+                <th class="text-left py-3 px-4 font-medium">DETAILS</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTable" class="text-[var(--text-secondary)]">
+              <tr><td colspan="5" class="py-8 text-center">Loading inventory...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Posting Log Tab -->
+      <div id="tab-posting" class="tab-content p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)]">POSTING LOG</h3>
+            <p class="text-xs text-[var(--text-muted)] mt-1">Recent listing activity across platforms</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="text-[var(--emerald-accent)]">● LIVE UPDATES</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs font-mono">
+            <thead>
+              <tr class="text-[var(--text-muted)] border-b border-[var(--border)]">
+                <th class="text-left py-3 px-4 font-medium">TIME</th>
+                <th class="text-left py-3 px-4 font-medium">PLATFORM</th>
+                <th class="text-left py-3 px-4 font-medium">IPHONE MODEL</th>
+                <th class="text-left py-3 px-4 font-medium">STATUS</th>
+                <th class="text-left py-3 px-4 font-medium">METRICS</th>
+              </tr>
+            </thead>
+            <tbody id="postsTable" class="text-[var(--text-secondary)]">
+              <tr>
+                <td colspan="5" class="py-8 text-center">
+                  <div class="text-[var(--text-muted)]">No posts yet</div>
+                  <div class="text-[10px] mt-2">Automation will start once accounts are configured</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div id="tab-analytics" class="tab-content p-6">
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">PLATFORM PERFORMANCE</h3>
+            <canvas id="platformChart" height="200"></canvas>
+            <div class="mt-4 space-y-2" id="platformStats">
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Facebook</span>
+                <span class="text-[var(--text-primary)] font-mono" id="fbCount">0 posts</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Threads</span>
+                <span class="text-[var(--text-primary)] font-mono" id="threadsCount">0 posts</span>
+              </div>
+              <div class="flex justify-between text-xs">
+                <span class="text-[var(--text-muted)]">Carousell</span>
+                <span class="text-[var(--text-primary)] font-mono" id="carousellCount">0 posts</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">ACTIVITY FEED</h3>
+            <div class="space-y-2 max-h-64 overflow-y-auto" id="activityFeed">
+              <div class="text-xs text-[var(--text-muted)] font-mono">Waiting for activity...</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="tab-posting" class="tab-content">
-      <div class="table-header">
-        <div class="table-title">Platform Posting History</div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Platform</th>
-            <th>Product</th>
-            <th>Status</th>
-            <th>Metrics</th>
-          </tr>
-        </thead>
-        <tbody id="postsTable">
-          <tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-secondary);">No posts yet — automation pending account setup</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div id="tab-activity" class="tab-content">
-      <div class="table-header">
-        <div class="table-title">System Activity Log</div>
-      </div>
-      <div style="padding: 1.5rem;" id="activityFeed">
-        <div style="font-size: 0.7rem; color: var(--text-muted);">Waiting for sync...</div>
+    <!-- Task Board -->
+    <div class="glass p-5">
+      <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-4">AUTOMATION QUEUE</h3>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>PENDING</span>
+            <span class="px-1.5 py-0.5 bg-[var(--bg-card)] rounded font-mono" id="pendingCount">0</span>
+          </div>
+          <div class="space-y-2" id="pendingTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No pending tasks</div>
+          </div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>IN PROGRESS</span>
+            <span class="px-1.5 py-0.5 bg-[var(--blue-accent)]/20 text-[var(--blue-accent)] rounded font-mono" id="progressCount">0</span>
+          </div>
+          <div class="space-y-2" id="progressTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No active tasks</div>
+          </div>
+        </div>
+        <div class="bg-[var(--bg-dark)]/50 rounded-lg p-3">
+          <div class="text-xs text-[var(--text-muted)] mb-2 flex items-center justify-between">
+            <span>DONE</span>
+            <span class="px-1.5 py-0.5 bg-[var(--emerald-accent)]/20 text-[var(--emerald-accent)] rounded font-mono" id="doneCount">0</span>
+          </div>
+          <div class="space-y-2" id="doneTasks">
+            <div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
-  <footer>
-    <div class="container footer-content">
-      <div>CELLTOPIA INVENTORY SYSTEM v1.0</div>
-      <div>POWERED BY SUPABASE · SYNC INTERVAL: 60s</div>
-    </div>
-  </footer>
-
   <script>
+    // Supabase config
     const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
+    let platformChart;
+    let isInitialized = false;
     let inventoryData = [];
     let apiCalls = 0;
     let totalProductsFetched = 0;
     let llmTokens = 0;
     let postsCreated = 0;
-    let terminalLineCount = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
+      initChart();
+      animateEntrance();
       addTerminalLine('system', 'Dashboard initialized');
       addTerminalLine('system', 'Sync interval: 60 seconds');
       addTerminalLine('system', 'Connecting to Supabase...');
       
       refreshData();
-      setInterval(refreshData, 60000); // 1 minute
+      setInterval(refreshData, 60000); // 60 seconds
       
-      // Simulate real-time token updates (demo mode - will be replaced with actual API calls)
+      // Real-time token counter update (every second)
       setInterval(() => {
-        // This simulates the visual update - real token tracking happens when automation runs
-        document.getElementById('tokenSession').textContent = (apiCalls + llmTokens).toLocaleString();
+        const totalTokens = apiCalls + llmTokens;
+        document.getElementById('tokenSession').textContent = totalTokens.toLocaleString();
+        document.getElementById('tokenDaily').textContent = totalTokens.toLocaleString();
       }, 1000);
     });
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
-
+    // Add terminal line
     function addTerminalLine(type, message, output = null) {
       const feed = document.getElementById('terminalFeed');
       const now = new Date().toLocaleTimeString('id-ID', { hour12: false });
@@ -739,22 +574,59 @@
       
       feed.appendChild(line);
       
-      // Trigger animation
       setTimeout(() => line.classList.add('visible'), 10);
-      
-      // Scroll to bottom
       feed.scrollTop = feed.scrollHeight;
       
-      // Limit lines
       if (feed.children.length > 50) {
         feed.removeChild(feed.children[0]);
       }
-      
-      terminalLineCount++;
     }
 
+    // Tab switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    // Chart
+    function initChart() {
+      const ctx = document.getElementById('platformChart').getContext('2d');
+      platformChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Facebook', 'Threads', 'Carousell'],
+          datasets: [{
+            label: 'Posts',
+            data: [0, 0, 0],
+            backgroundColor: ['rgba(59, 130, 246, 0.5)', 'rgba(255, 255, 255, 0.3)', 'rgba(246, 110, 12, 0.5)'],
+            borderColor: ['#3b82f6', '#ffffff', '#f66e0c'],
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } },
+            x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } }
+          }
+        }
+      });
+    }
+
+    // Animate entrance
+    function animateEntrance() {
+      gsap.from('.glass', { opacity: 0, y: 20, duration: 0.5, stagger: 0.1, ease: 'power3.out', delay: 0.2 });
+      gsap.from('.terminal', { opacity: 0, y: 20, duration: 0.5, ease: 'power3.out', delay: 0.4 });
+    }
+
+    // Refresh data
     async function refreshData() {
-      const syncTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const syncTime = new Date().toLocaleTimeString('id-ID');
       document.getElementById('lastSync').textContent = syncTime;
 
       try {
@@ -763,15 +635,15 @@
         
         const startTime = performance.now();
         
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        const inventoryResponse = await fetch(`${SUPABASE_URL}/rest/v1/products?sold=eq.false&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
         });
 
         const duration = Math.round(performance.now() - startTime);
 
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!inventoryResponse.ok) throw new Error(`HTTP ${inventoryResponse.status}`);
 
-        const inventory = await response.json();
+        const inventory = await inventoryResponse.json();
         inventoryData = inventory;
         totalProductsFetched = inventory.length;
 
@@ -789,96 +661,198 @@
       }
     }
 
+    // Update token usage
     function updateTokenUsage() {
       document.getElementById('tokenScraping').textContent = apiCalls.toLocaleString();
       document.getElementById('tokenLLM').textContent = llmTokens.toLocaleString();
       document.getElementById('tokenContent').textContent = totalProductsFetched.toLocaleString();
       document.getElementById('tokenPosting').textContent = postsCreated.toLocaleString();
-      document.getElementById('tokenSession').textContent = (apiCalls + llmTokens).toLocaleString();
+      
+      const totalTokens = apiCalls + llmTokens;
+      document.getElementById('tokenSession').textContent = totalTokens.toLocaleString();
+      document.getElementById('tokenDaily').textContent = totalTokens.toLocaleString();
 
       const percentage = (apiCalls / 1000) * 100;
       document.getElementById('tokenProgress').style.width = `${Math.min(percentage, 100)}%`;
       document.getElementById('tokenPercentage').textContent = `${percentage.toFixed(2)}% used`;
     }
 
-    function updateDashboard(inventory, syncTime) {
-      const total = inventory.length;
+    // Update dashboard
+    function updateDashboard(posts, inventory = []) {
+      const totalInventory = inventory.length;
       const inStock = inventory.filter(p => p.stock > 0).length;
       const outOfStock = inventory.filter(p => p.stock <= 0).length;
 
-      document.getElementById('inventoryCount').textContent = total;
-      document.getElementById('inventoryStatus').textContent = `IN: ${inStock} · OUT: ${outOfStock}`;
+      const bySeries = {};
+      inventory.forEach(p => {
+        const series = p.series || 'Unknown';
+        bySeries[series] = (bySeries[series] || 0) + 1;
+      });
 
-      const iBox = inventory.filter(p => p.warranty).length;
-      const bc = total - iBox;
-      document.getElementById('warrantyCount').textContent = total;
-      document.getElementById('warrantyStatus').textContent = `iBox: ${iBox} · BC: ${bc}`;
+      const today = new Date().toDateString();
+      const todayPosts = posts.filter(p => new Date(p.created_at).toDateString() === today);
+      const fbPosts = todayPosts.filter(p => p.platform === 'facebook').length;
+      const threadsPosts = todayPosts.filter(p => p.platform === 'threads').length;
+      const carousellPosts = todayPosts.filter(p => p.platform === 'carousell').length;
 
-      const prices = inventory.map(p => p.price || 0).filter(p => p > 0);
-      if (prices.length > 0) {
-        const min = Math.min(...prices);
-        const max = Math.max(...prices);
-        const avg = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length);
-        document.getElementById('priceRange').textContent = `Rp ${(min/1e6).toFixed(1)}M - ${(max/1e6).toFixed(1)}M`;
-        document.getElementById('avgPrice').textContent = `Avg: Rp ${(avg/1e6).toFixed(1)}M`;
+      animateValue('inventoryCount', totalInventory);
+      document.getElementById('inventoryStatus').innerHTML = `<span class="text-[var(--emerald-accent)]">IN: ${inStock}</span> · <span class="text-red-400">OUT: ${outOfStock}</span>`;
+
+      animateValue('postsToday', todayPosts.length);
+      document.getElementById('postsBreakdown').innerHTML = `<span class="text-[var(--blue-accent)]">FB: ${fbPosts}</span> · <span class="text-[var(--text-primary)]">TH: ${threadsPosts}</span> · <span class="text-[var(--orange-accent)]">CR: ${carousellPosts}</span>`;
+
+      const totalViews = todayPosts.reduce((sum, p) => sum + (p.views || 0), 0);
+      const totalClicks = todayPosts.reduce((sum, p) => sum + (p.clicks || 0), 0);
+      const totalMessages = todayPosts.reduce((sum, p) => sum + (p.messages || 0), 0);
+
+      animateValue('totalEngagement', totalViews + totalClicks + totalMessages);
+      document.getElementById('engagementBreakdown').textContent = `👁 ${totalViews} · 🔗 ${totalClicks} · 💬 ${totalMessages}`;
+
+      const conversions = Math.floor(totalMessages * 0.3);
+      animateValue('conversions', conversions);
+      document.getElementById('conversionRate').textContent = `RATE: ${totalMessages > 0 ? Math.round((conversions / totalMessages) * 100) : 0}%`;
+
+      if (isInitialized) {
+        const sortedSeries = Object.entries(bySeries).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        platformChart.data.labels = sortedSeries.map(([series]) => `iPhone ${series}`);
+        platformChart.data.datasets[0].data = sortedSeries.map(([, count]) => count);
+        platformChart.update('default');
       }
 
-      document.getElementById('postsToday').textContent = '0';
-      document.getElementById('postsBreakdown').textContent = 'FB: 0 · TH: 0 · CR: 0';
+      document.getElementById('fbCount').textContent = bySeries[13] || 0;
+      document.getElementById('threadsCount').textContent = bySeries[14] || 0;
+      document.getElementById('carousellCount').textContent = bySeries[15] || 0;
 
       updateInventoryTable(inventory);
+      updatePostsTable(posts);
+      updateTaskBoard();
     }
 
+    // Animate value
+    function animateValue(id, target) {
+      const el = document.getElementById(id);
+      const current = parseInt(el.textContent.replace(/,/g, '')) || 0;
+      gsap.to({ value: current }, {
+        value: target, duration: 0.8, ease: 'power3.out',
+        onUpdate: function() { el.textContent = Math.round(this.targets()[0].value).toLocaleString(); }
+      });
+    }
+
+    // Update inventory table
     function updateInventoryTable(inventory) {
       const tbody = document.getElementById('inventoryTable');
       if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-secondary);">No inventory data</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-[var(--text-muted)]">No inventory data</td></tr>';
         return;
       }
 
-      tbody.innerHTML = inventory.slice(0, 15).map((p) => {
-        const warrantyBadge = p.warranty ? 'iBox' : 'BC';
-        const batteryHealth = p.battery ? `${p.battery}%` : '-';
-        
+      tbody.innerHTML = inventory.slice(0, 10).map((product, i) => {
+        const warrantyBadge = product.warranty ? 'iBox' : 'BC';
+        const batteryHealth = product.battery ? `${product.battery}%` : '-';
+        const condition = product.cas || '-';
+
         return `
-        <tr>
-          <td style="color: var(--text-muted);">${new Date(p.created_at).toLocaleDateString('id-ID')}</td>
-          <td><span class="model-badge">iPhone ${p.series || '?'}</span></td>
-          <td>${p.storage || '-'}</td>
-          <td>${p.color || '-'}</td>
-          <td>${batteryHealth}</td>
-          <td>${warrantyBadge}</td>
-          <td class="price-tag">Rp ${(p.price || 0).toLocaleString('id-ID')}</td>
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
+          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(product.created_at).toLocaleDateString('id-ID')}</td>
+          <td class="py-3 px-4">
+            <span class="platform-badge bg-purple-900/30 text-[var(--purple-primary)] border border-purple-700/50">iPhone ${product.series || '?'}</span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">
+            ${product.name || 'Unknown'}
+            <div class="text-[10px] text-[var(--text-muted)] mt-0.5">${product.storage || ''} · ${product.color || ''}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-1 rounded-md text-[10px] font-medium bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50">Rp ${(product.price || 0).toLocaleString('id-ID')}</span>
+          </td>
+          <td class="py-3 px-4 text-[var(--text-muted)]">
+            🔋 ${batteryHealth} · ${warrantyBadge}
+            <div class="text-[10px] mt-1 truncate max-w-[150px]" title="${condition}">${condition}</div>
+          </td>
         </tr>
       `}).join('');
     }
 
-    function updateActivityFeed(inventory, syncTime, success, errorMsg = '') {
-      const feed = document.getElementById('activityFeed');
-      
-      if (success && inventory.length > 0) {
-        feed.innerHTML = `
-          <div style="font-size: 0.7rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
-            <span style="color: var(--text-muted);">${syncTime}</span>
-            <span style="color: var(--success); margin-left: 0.75rem;">✓ Synced ${inventory.length} products</span>
-          </div>
-          <div style="font-size: 0.7rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
-            <span style="color: var(--text-muted);">${syncTime}</span>
-            <span style="color: var(--text-secondary); margin-left: 0.75rem;">→ API call #${apiCalls}</span>
-          </div>
-          <div style="font-size: 0.7rem; padding: 0.75rem 0;">
-            <span style="color: var(--text-muted);">${syncTime}</span>
-            <span style="color: var(--text-secondary); margin-left: 0.75rem;">→ Next sync: 60s</span>
-          </div>
-        `;
-      } else if (!success) {
-        feed.innerHTML = `
-          <div style="font-size: 0.7rem; padding: 0.75rem 0;">
-            <span style="color: var(--text-muted);">${syncTime}</span>
-            <span style="color: var(--error); margin-left: 0.75rem;">✗ Sync failed: ${errorMsg}</span>
-          </div>
-        `;
+    // Update posts table
+    function updatePostsTable(posts) {
+      const tbody = document.getElementById('postsTable');
+      if (posts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center"><div class="text-[var(--text-muted)]">No posts yet</div><div class="text-[10px] mt-2">Automation will start once accounts are configured</div></td></tr>';
+        return;
       }
+      tbody.innerHTML = posts.slice(0, 10).map((post, i) => `
+        <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 50}ms;">
+          <td class="py-3 px-4 text-[var(--text-muted)]">${new Date(post.created_at).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4"><span class="platform-badge ${getPlatformClass(post.platform)}">${post.platform?.toUpperCase()}</span></td>
+          <td class="py-3 px-4 text-[var(--text-primary)] font-medium">${post.product_name || 'Unknown'}</td>
+          <td class="py-3 px-4"><span class="px-2 py-1 rounded-md text-[10px] font-medium ${post.status === 'success' ? 'bg-emerald-900/30 text-[var(--emerald-accent)] border border-emerald-700/50' : 'bg-red-900/30 text-red-400 border border-red-700/50'}">${post.status?.toUpperCase()}</span></td>
+          <td class="py-3 px-4 text-[var(--text-muted)]">👁 ${post.views || 0} · 🔗 ${post.clicks || 0} · 💬 ${post.messages || 0}</td>
+        </tr>
+      `).join('');
+    }
+
+    function getPlatformClass(platform) {
+      const classes = {
+        facebook: 'bg-blue-900/30 text-[var(--blue-accent)] border border-blue-700/50',
+        threads: 'bg-zinc-700/30 text-[var(--text-primary)] border border-zinc-600/50',
+        carousell: 'bg-orange-900/30 text-[var(--orange-accent)] border border-orange-700/50'
+      };
+      return classes[platform] || 'bg-zinc-800/30 text-[var(--text-muted)] border border-zinc-700/50';
+    }
+
+    // Update activity feed
+    function updateActivityFeed(inventory = [], syncTime, success = true, errorMsg = '') {
+      const feedContainer = document.getElementById('activityFeed');
+      let activities = [];
+
+      if (success && inventory.length > 0) {
+        activities = [
+          { time: syncTime, action: `✓ Synced ${inventory.length} products`, type: 'success' },
+          { time: syncTime, action: '→ Inventory refreshed', type: 'info' },
+          { time: syncTime, action: '→ Next: 60s', type: 'info' },
+        ];
+      } else if (!success) {
+        activities = [
+          { time: syncTime, action: `✗ Sync failed: ${errorMsg}`, type: 'error' },
+          { time: syncTime, action: '→ Check console (F12)', type: 'warning' },
+        ];
+      }
+
+      feedContainer.innerHTML = activities.map((a, i) => {
+        const colorClass = a.type === 'success' ? 'text-[var(--emerald-accent)]' : a.type === 'error' ? 'text-red-400' : 'text-orange-400';
+        const icon = a.type === 'success' ? '✓' : a.type === 'error' ? '✗' : '→';
+        return `<div class="flex items-start gap-3 text-xs py-2.5 px-3 rounded-xl hover:bg-[var(--bg-card-hover)] transition" style="animation-delay: ${i * 80}ms;"><span class="text-[var(--text-muted)] font-mono">${a.time}</span><span class="${colorClass}">${icon} ${a.action}</span></div>`;
+      }).join('');
+    }
+
+    // Task board
+    function updateTaskBoard() {
+      document.getElementById('pendingCount').textContent = '3';
+      document.getElementById('pendingTasks').innerHTML = `
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+          <div class="text-[var(--text-primary)] font-medium">Scrape inventory</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">Next: 60s</div>
+        </div>
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+          <div class="text-[var(--text-primary)] font-medium">Generate variations</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">iPhone 15 Pro × 5</div>
+        </div>
+        <div class="glass p-3 text-xs cursor-pointer hover:border-[var(--purple-primary)] transition">
+          <div class="text-[var(--text-primary)] font-medium">Post to platforms</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">FB, Threads, Carousell</div>
+        </div>
+      `;
+      document.getElementById('progressCount').textContent = '1';
+      document.getElementById('progressTasks').innerHTML = `
+        <div class="glass p-3 text-xs cursor-pointer border-l-2 border-[var(--purple-primary)]">
+          <div class="text-[var(--text-primary)] font-medium">Syncing inventory...</div>
+          <div class="text-[var(--text-muted)] mt-1.5 font-mono">In progress</div>
+          <div class="mt-2.5 h-1.5 bg-[var(--bg-dark)] rounded-full overflow-hidden">
+            <div class="h-full progress-gradient rounded-full" style="width: 100%;"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('doneCount').textContent = '0';
+      document.getElementById('doneTasks').innerHTML = `<div class="text-xs text-[var(--text-muted)] font-mono">No completed tasks</div>`;
     }
   </script>
 </body>
