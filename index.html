@@ -7,6 +7,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -661,6 +662,82 @@
     const SUPABASE_URL = 'https://hzjokyhrpvffbdsookth.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_D5oqYyWJcS0Y2whbWZs_jg_Nx0TWvvf';
 
+    // Persistent API metrics (tracks across refreshes)
+    let apiMetricsCache = null;
+
+    async function trackApiCall() {
+      const today = new Date().toISOString().split('T')[0];
+      try {
+        const { data: metrics } = await fetch(`${SUPABASE_URL}/rest/v1/api_metrics?select=*&limit=1`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        }).then(r => r.json());
+        
+        if (!metrics || metrics.length === 0) {
+          await fetch(`${SUPABASE_URL}/rest/v1/api_metrics`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ first_call_date: today, active_days: [today], total_api_calls: 1 })
+          });
+          apiMetricsCache = { first_call_date: today, active_days: [today], total_api_calls: 1 };
+          return;
+        }
+        
+        const m = metrics[0];
+        const activeDays = m.active_days || [];
+        const isActiveDay = activeDays.includes(today);
+        const newDays = isActiveDay ? activeDays : [...activeDays, today];
+        
+        const { data: updated } = await fetch(`${SUPABASE_URL}/rest/v1/api_metrics?id=eq.${m.id}`, {
+          method: 'PATCH',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ active_days: newDays, total_api_calls: (m.total_api_calls || 0) + 1, updated_at: new Date().toISOString() })
+        }).then(r => r.json());
+        
+        apiMetricsCache = updated[0];
+      } catch (e) {
+        console.error('trackApiCall error:', e.message);
+      }
+    }
+
+    async function loadApiMetrics() {
+      try {
+        if (apiMetricsCache) return apiMetricsCache;
+        const { data } = await fetch(`${SUPABASE_URL}/rest/v1/api_metrics?select=*&limit=1`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`
+        }).then(r => r.json());
+        apiMetricsCache = data && data.length > 0 ? data[0] : null;
+        return apiMetricsCache;
+      } catch (e) {
+        console.error('loadApiMetrics error:', e);
+        return null;
+      }
+    }
+
+    async function updateApiMetricsDisplay() {
+      const metrics = await loadApiMetrics();
+      const els = {
+        apiCalls: document.getElementById('statApiCalls'),
+        apiDays: document.getElementById('statApiDays'),
+        apiSince: document.getElementById('statApiSince')
+      };
+      
+      if (!els.apiCalls) return;
+      
+      if (metrics) {
+        const firstDate = metrics.first_call_date;
+        const daysSince = firstDate ? Math.ceil((Date.now() - new Date(firstDate).getTime()) / 86400000) : 0;
+        const activeDays = (metrics.active_days || []).length;
+        
+        els.apiCalls.textContent = (metrics.total_api_calls || 0).toLocaleString();
+        if (els.apiDays) els.apiDays.textContent = daysSince;
+        if (els.apiSince) els.apiSince.textContent = activeDays;
+      } else {
+        els.apiCalls.textContent = '0';
+        if (els.apiDays) els.apiDays.textContent = '0';
+        if (els.apiSince) els.apiSince.textContent = '0';
+      }
+    }
+
     let platformChart = null;
     let trendChart = null;
     let inventoryData = [];
@@ -685,8 +762,16 @@
       addTerminalLine('system', 'Sync interval: 60 seconds');
       addTerminalLine('system', 'Alert monitoring: SOLD + NEW STOCK');
       
+      // Load persistent API metrics on page load
+      updateApiMetricsDisplay();
+      
       refreshData();
       setInterval(refreshData, 60000);
+      
+      // GSAP entrance animations for cards
+      gsap.from('.stat-card', { duration: 0.5, y: 20, opacity: 0, stagger: 0.1, ease: 'power2.out' });
+      gsap.from('.glass-card', { duration: 0.6, y: 24, opacity: 0, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+      gsap.from('.terminal', { duration: 0.5, y: 16, opacity: 0, ease: 'power2.out', delay: 0.4 });
       
       // Throttled token counter (5s instead of 1s)
       setInterval(() => {
@@ -817,6 +902,7 @@
 
       try {
         apiCalls++;
+        trackApiCall(); // Track persistent API call
         addTerminalLine('command', `fetch products --supabase`);
         const startTime = performance.now();
         
